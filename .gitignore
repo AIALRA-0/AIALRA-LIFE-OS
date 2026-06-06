@@ -1,0 +1,11 @@
+node_modules
+.next
+.vercel
+dist
+coverage
+prompts/
+.env
+.env*
+!.env.example
+*.tsbuildinfo
+prisma/migrations/*/migration_lock.toml

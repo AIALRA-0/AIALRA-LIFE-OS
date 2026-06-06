@@ -1,0 +1,403 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum BlockStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  PARTIAL
+  MISSED
+  SKIPPED
+  RESCHEDULED
+}
+
+enum AgentRunStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum ResourceStatus {
+  SEED
+  ACTIVE
+  REVIEW
+  ARCHIVED
+}
+
+enum PriorityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model UserProfile {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  displayName    String?
+  timezone       String   @default("America/New_York")
+  sleepStart     String   @default("20:00")
+  wakeTime       String   @default("03:00")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  dailyInputs    DailyInput[]
+  dailyPlans     DailyPlan[]
+  executionLogs  ExecutionLog[]
+  skillEvidence  SkillEvidence[]
+  metricSnapshots MetricSnapshot[]
+  journalEntries JournalEntry[]
+  backlogItems   BacklogItem[]
+  decisionLogs   DecisionLog[]
+  auditEvents    AuditEvent[]
+}
+
+model CoreFramework {
+  id          String   @id @default(uuid())
+  version     String
+  title       String
+  content     Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  anchors     Anchor[]
+}
+
+model Anchor {
+  id             String   @id @default(uuid())
+  frameworkId    String
+  code           String   @unique
+  name           String
+  time           String
+  required       Boolean  @default(true)
+  definitionDone String
+  sortOrder      Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  framework      CoreFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+}
+
+model Resource {
+  id                   String         @id
+  name                 String
+  url                  String
+  language             String
+  price                String
+  learningDepth        String
+  practicality         String
+  jobMatch             Float
+  completionThreshold  String
+  replacementRisk      String
+  tags                 String[]
+  phase                String[]
+  accessChannel        String
+  status               ResourceStatus @default(SEED)
+  notes                String?
+  lastVerifiedAt       DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+
+  planBlocks           PlanBlockResource[]
+  skillEvidence        SkillEvidence[]
+}
+
+model SkillNode {
+  id                String   @id
+  parentId          String?
+  name              String
+  domain            String
+  currentLevel      Float    @default(0)
+  targetLevel       Float    @default(5)
+  evidenceRequired  String[]
+  description       String?
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  parent            SkillNode?  @relation("SkillTree", fields: [parentId], references: [id])
+  children          SkillNode[] @relation("SkillTree")
+  evidence          SkillEvidence[]
+  planBlocks        PlanBlockSkill[]
+}
+
+model SkillEvidence {
+  id             String   @id @default(uuid())
+  userId         String
+  skillNodeId    String
+  resourceId     String?
+  title          String
+  description    String
+  artifactUrl    String?
+  delta          Float    @default(0)
+  confidence     Float    @default(0.5)
+  evidenceDate   DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillNode      SkillNode   @relation(fields: [skillNodeId], references: [id], onDelete: Cascade)
+  resource       Resource?   @relation(fields: [resourceId], references: [id])
+}
+
+model DailyInput {
+  id                String   @id @default(uuid())
+  userId            String
+  date              DateTime
+  mustDo            String
+  temporaryItems    String?
+  specialNeeds      String?
+  bodyStatus        Json?
+  mentalStatus      Json?
+  availableWindows  Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyPlan         DailyPlan?
+}
+
+model DailyPlan {
+  id               String      @id @default(uuid())
+  userId           String
+  dailyInputId     String?     @unique
+  date             DateTime
+  timezone         String      @default("America/New_York")
+  title            String
+  dayTheme         String
+  riskLevel        String
+  status           PlanStatus  @default(DRAFT)
+  aiSummary        String?
+  planJson         Json
+  rescuePlanJson   Json?
+  successCriteria  String[]
+  createdBy        String      @default("agent")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  user             UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyInput       DailyInput? @relation(fields: [dailyInputId], references: [id])
+  blocks           PlanBlock[]
+  agentRuns        AgentRun[]
+}
+
+model PlanBlock {
+  id              String      @id @default(uuid())
+  dailyPlanId     String
+  startTime       String
+  endTime         String
+  domain          String
+  title           String
+  method          String
+  expectedOutput  String
+  difficulty      Int         @default(3)
+  checkinRequired Boolean     @default(true)
+  status          BlockStatus @default(PLANNED)
+  actualStart     DateTime?
+  actualEnd       DateTime?
+  sortOrder       Int
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  dailyPlan       DailyPlan   @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  executionLogs   ExecutionLog[]
+  resources       PlanBlockResource[]
+  skills          PlanBlockSkill[]
+}
+
+model PlanBlockResource {
+  planBlockId String
+  resourceId  String
+
+  planBlock   PlanBlock @relation(fields: [planBlockId], references: [id], onDelete: Cascade)
+  resource    Resource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@id([planBlockId, resourceId])
+}
+
+model PlanBlockSkill {
+  planBlockId String
+  skillNodeId String
+
+  planBlock   PlanBlock @relation(fields: [planBlockId], references: [id], onDelete: Cascade)
+  skillNode   SkillNode @relation(fields: [skillNodeId], references: [id], onDelete: Cascade)
+
+  @@id([planBlockId, skillNodeId])
+}
+
+model ExecutionLog {
+  id            String   @id @default(uuid())
+  userId        String
+  planBlockId   String?
+  status        BlockStatus
+  actualStart   DateTime?
+  actualEnd     DateTime?
+  energy        Int      @default(3)
+  focus         Int      @default(3)
+  urgeTrigger   String?
+  note          String
+  artifactUrl   String?
+  rawJson       Json?
+  createdAt     DateTime @default(now())
+
+  user          UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planBlock     PlanBlock?  @relation(fields: [planBlockId], references: [id], onDelete: SetNull)
+}
+
+model MetricSnapshot {
+  id             String   @id @default(uuid())
+  userId         String
+  date           DateTime
+  sleepQuality   Int?
+  weightKg       Float?
+  waistCm        Float?
+  painLevel      Int?
+  mood           Int?
+  anxiety        Int?
+  focus          Int?
+  steps          Int?
+  workoutMinutes Int?
+  caloriesNote   String?
+  supplements    Json?
+  createdAt      DateTime @default(now())
+
+  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AgentRun {
+  id              String         @id @default(uuid())
+  dailyPlanId      String?
+  runType          String
+  model            String
+  status           AgentRunStatus @default(QUEUED)
+  inputJson        Json
+  outputJson       Json?
+  outputText       String?
+  error            String?
+  openaiResponseId String?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  dailyPlan        DailyPlan?      @relation(fields: [dailyPlanId], references: [id], onDelete: SetNull)
+  researchReports  ResearchReport[]
+}
+
+model ResearchReport {
+  id          String   @id @default(uuid())
+  agentRunId  String
+  title       String
+  summary     String
+  reportMd    String
+  citations   Json?
+  sources     Json?
+  createdAt   DateTime @default(now())
+
+  agentRun    AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+}
+
+model FileAsset {
+  id          String   @id @default(uuid())
+  name        String
+  mimeType    String
+  sizeBytes   Int?
+  storagePath String
+  publicUrl   String?
+  sourceType  String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+}
+
+model JournalEntry {
+  id          String   @id @default(uuid())
+  userId      String
+  date        DateTime
+  entryType   String
+  title       String
+  content     String
+  tags        String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BacklogItem {
+  id          String        @id @default(uuid())
+  userId      String
+  title       String
+  description String?
+  domain      String
+  priority    PriorityLevel @default(MEDIUM)
+  status      String        @default("open")
+  dueDate     DateTime?
+  source      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user        UserProfile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DecisionLog {
+  id             String   @id @default(uuid())
+  userId         String
+  title          String
+  decision       String
+  context        String
+  optionsJson    Json
+  criteriaJson   Json
+  resultJson     Json?
+  reviewDate     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PromptTemplate {
+  id          String   @id
+  name        String
+  version     String
+  description String?
+  template    String
+  outputSchema Json?
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model AuditEvent {
+  id          String   @id @default(uuid())
+  userId      String?
+  eventType   String
+  entityType  String?
+  entityId    String?
+  payload     Json
+  createdAt   DateTime @default(now())
+
+  user        UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

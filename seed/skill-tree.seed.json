@@ -1,0 +1,34 @@
+{
+  "root": {
+    "id": "root",
+    "name": "研究者的大脑、创业者的手、管理者的心、战略家的眼、运动员的身体",
+    "target_level": 10,
+    "current_level": 1,
+    "children": ["body", "chip_eda", "ai_agent", "business", "arts", "social_expression"]
+  },
+  "nodes": [
+    {"id":"body","parent_id":"root","name":"运动员的身体","domain":"health","current_level":1,"target_level":8,"evidence_required":["14天连续睡眠记录","14天运动记录","腰椎疼痛/体重/体能趋势"]},
+    {"id":"sleep","parent_id":"body","name":"20:00-03:00睡眠系统","domain":"health","current_level":1,"target_level":9,"evidence_required":["连续7天20:00前关灯","起床打卡","睡眠质量评分"]},
+    {"id":"diet","parent_id":"body","name":"饮食/补剂/减脂系统","domain":"health","current_level":1,"target_level":8,"evidence_required":["每日饮食记录","每周体重趋势","库存食品处理计划"]},
+    {"id":"training","parent_id":"body","name":"跑步+无器械+腰椎友好训练","domain":"health","current_level":1,"target_level":8,"evidence_required":["操场训练记录","无器械训练组数","疼痛和恢复记录"]},
+    {"id":"chip_eda","parent_id":"root","name":"芯片/EDA主线","domain":"technical","current_level":1,"target_level":9,"evidence_required":["3个可运行repo","1个RTL2GDS报告","1个综合作品页"]},
+    {"id":"digital_ic","parent_id":"chip_eda","name":"数字IC/RTL设计","domain":"technical","current_level":1,"target_level":8,"evidence_required":["ALU/FIFO/UART/APB模块","可复现实验说明","波形截图"]},
+    {"id":"verification","parent_id":"chip_eda","name":"数字验证/DV","domain":"technical","current_level":1,"target_level":9,"evidence_required":["cocotb测试","Verilator回归","coverage/assertion说明"]},
+    {"id":"uvm","parent_id":"verification","name":"SystemVerilog/UVM","domain":"technical","current_level":0,"target_level":8,"evidence_required":["UVM driver/monitor/scoreboard","sequence/coverage/assertions","可讲清架构图"]},
+    {"id":"open_source_eda","parent_id":"chip_eda","name":"Yosys/OpenROAD/Tiny Tapeout","domain":"technical","current_level":1,"target_level":8,"evidence_required":["Yosys synthesis report","OpenROAD layout report","Tiny Tapeout candidate docs"]},
+    {"id":"riscv_soc","parent_id":"chip_eda","name":"RISC-V/SoC/Chipyard","domain":"technical","current_level":1,"target_level":8,"evidence_required":["RV32I知识卡","Chipyard配置运行记录","SoC集成图"]},
+    {"id":"ai_for_eda","parent_id":"chip_eda","name":"AI for EDA / 工具链自动化","domain":"technical","current_level":1,"target_level":9,"evidence_required":["回归自动化脚本","日志解释器","设计文档生成器","失败案例审计"]},
+    {"id":"ai_agent","parent_id":"root","name":"AI Agent/个人工作流系统","domain":"systems","current_level":2,"target_level":8,"evidence_required":["每日计划生成","资源库维护","技能树更新","agent run审计"]},
+    {"id":"lifeos_product","parent_id":"ai_agent","name":"Aialra Life OS产品化","domain":"systems","current_level":0,"target_level":8,"evidence_required":["MVP部署","资源库seed","日计划schema","执行日志闭环"]},
+    {"id":"business","parent_id":"root","name":"商业/金融/管理/战略","domain":"business","current_level":1,"target_level":8,"evidence_required":["每周1篇商业笔记","每周1个行业/公司拆解","表达录音"]},
+    {"id":"finance","parent_id":"business","name":"金融/估值/资本认知","domain":"business","current_level":0,"target_level":7,"evidence_required":["现金流卡片","估值概念卡","个人预算表"]},
+    {"id":"management","parent_id":"business","name":"管理/团队/组织","domain":"business","current_level":0,"target_level":8,"evidence_required":["团队案例笔记","冲突/授权/复盘模板"]},
+    {"id":"strategy","parent_id":"business","name":"产业战略/社会认知","domain":"business","current_level":1,"target_level":8,"evidence_required":["半导体公司地图","中美产业对比笔记","职业路径决策记录"]},
+    {"id":"arts","parent_id":"root","name":"声乐/舞蹈/音乐制作","domain":"arts","current_level":2,"target_level":8,"evidence_required":["每日录音","每日舞蹈视频","每周loop/session导出"]},
+    {"id":"vocal","parent_id":"arts","name":"科学声乐/表演","domain":"arts","current_level":3,"target_level":8,"evidence_required":["练声录音","完整歌曲录音","方法论笔记"]},
+    {"id":"dance","parent_id":"arts","name":"舞蹈/协调性/爆发力","domain":"arts","current_level":1,"target_level":7,"evidence_required":["基础律动视频","combo片段","月度对比"]},
+    {"id":"music_production","parent_id":"arts","name":"编曲/混音/音乐制作","domain":"arts","current_level":1,"target_level":7,"evidence_required":["8-16小节loop","工程文件","听感/混音笔记"]},
+    {"id":"social_expression","parent_id":"root","name":"表达/外部反馈/关系","domain":"social","current_level":1,"target_level":8,"evidence_required":["每日2分钟口述","每周Toastmasters/模拟演讲","行业访谈记录"]},
+    {"id":"job_pipeline","parent_id":"social_expression","name":"求职/行业访谈/外部验证","domain":"career","current_level":0,"target_level":8,"evidence_required":["投递记录","referral记录","面试复盘"]}
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "system_name": "Aialra Life OS",
+  "repo_name_recommendation": "aialra-lifeos",
+  "domain_placeholder": "<SUBDOMAIN>.aialra.online",
+  "timezone": "America/New_York",
+  "hard_constraints": {
+    "sleep_start": "20:00",
+    "wake_time": "03:00",
+    "daily_sleep_hours": 7,
+    "plan_granularity_minutes": 30,
+    "no_screen_stimulus_after": "19:00",
+    "hard_reset_rule": "If a block is missed, never push the whole day; jump to current block and log the miss. 20:00 sleep remains absolute."
+  },
+  "daily_anchor_points": [
+    {
+      "id": "A0_WAKE",
+      "time": "03:00",
+      "name": "起床启动",
+      "required": true,
+      "definition_of_done": "起床、喝水、洗漱、开灯、离床、记录睡眠质量和体重。"
+    },
+    {
+      "id": "A1_PLAN",
+      "time": "03:30",
+      "name": "今日AI计划确认",
+      "required": true,
+      "definition_of_done": "输入今日临时事项/必须节点/身体状态，生成或确认当天半小时计划。"
+    },
+    {
+      "id": "A2_BODY",
+      "time": "06:00",
+      "name": "身体训练",
+      "required": true,
+      "definition_of_done": "完成30-60分钟运动；腰椎不适时降级为走路+核心稳定。"
+    },
+    {
+      "id": "A3_MEAL_1",
+      "time": "09:00",
+      "name": "第一顿正式饭",
+      "required": true,
+      "definition_of_done": "蛋白+主食+蔬菜，记录饮食，不看高刺激内容。"
+    },
+    {
+      "id": "A4_MAINLINE_REVIEW",
+      "time": "12:30",
+      "name": "技术主线中段审计",
+      "required": true,
+      "definition_of_done": "确认今日芯片/EDA主线是否已有可见产物；无产物则下午优先补产物。"
+    },
+    {
+      "id": "A5_MEAL_2",
+      "time": "16:00",
+      "name": "第二顿正式饭",
+      "required": true,
+      "definition_of_done": "晚饭清淡，避免过饱，记录饮食。"
+    },
+    {
+      "id": "A6_SHUTDOWN",
+      "time": "18:30",
+      "name": "日结与明日准备",
+      "required": true,
+      "definition_of_done": "执行记录、技能树更新、agent输出验收、明日材料准备。"
+    },
+    {
+      "id": "A7_SLEEP",
+      "time": "20:00",
+      "name": "关灯睡觉",
+      "required": true,
+      "definition_of_done": "20:00上床关灯；当天未完成事项不熬夜补偿。"
+    }
+  ],
+  "daily_required_domains": [
+    { "id": "health", "name": "运动/身体/恢复", "minimum_minutes": 60, "target_minutes": 90 },
+    { "id": "diet", "name": "饮食与补剂记录", "minimum_minutes": 30, "target_minutes": 60 },
+    { "id": "vocal", "name": "声乐", "minimum_minutes": 20, "target_minutes": 30 },
+    { "id": "dance", "name": "舞蹈", "minimum_minutes": 20, "target_minutes": 30 },
+    { "id": "music", "name": "音乐制作/耳训", "minimum_minutes": 20, "target_minutes": 30 },
+    { "id": "chip_eda", "name": "芯片/EDA/数字验证主线", "minimum_minutes": 180, "target_minutes": 360 },
+    { "id": "ai_agent", "name": "AI Agent/个人工作流", "minimum_minutes": 30, "target_minutes": 60 },
+    { "id": "business", "name": "商业/金融/管理/表达", "minimum_minutes": 30, "target_minutes": 60 },
+    { "id": "external_feedback", "name": "求职/人际/外部反馈", "minimum_minutes": 15, "target_minutes": 45 },
+    { "id": "review", "name": "复盘/审计/技能树更新", "minimum_minutes": 20, "target_minutes": 30 }
+  ],
+  "mainline_priority": [
+    "Digital Verification",
+    "SystemVerilog + UVM + cocotb + Verilator",
+    "Yosys/OpenROAD RTL2GDS",
+    "Tiny Tapeout / RISC-V / Chipyard",
+    "AI-for-EDA automation as accelerator"
+  ],
+  "side_track_rules": {
+    "vocal_dance_music": "Daily continuity, not daily perfection. Must produce recording/video/session file, but keep scope tiny.",
+    "ai_agent": "Agent work is a force multiplier, never the main career product before chip/EDA deliverables exist.",
+    "business": "Build cognition, expression and capital literacy slowly; do not convert it into a startup distraction before 90-day technical evidence exists."
+  },
+  "overload_rules": [
+    "If sleep quality <= 2/5, body pain >= 3/5, or anxiety >= 4/5, downgrade technical target by 40% and preserve sleep/body/food/review anchors.",
+    "If two consecutive blocks fail, insert a 20-minute walk and generate a rescue plan instead of continuing with the original plan.",
+    "If user reports urge to game/porn/doomscroll, the system must suggest a 10-minute physical interrupt and log the trigger without moralizing.",
+    "No new resource purchase unless it maps to an active skill node and has a defined deliverable within 14 days."
+  ],
+  "default_daily_success_score": {
+    "excellent": "All anchors + at least 1 technical artifact + exercise + one external feedback + all three art micro outputs.",
+    "qualified": "At least 5 anchors + exercise + one technical artifact or one job/external action.",
+    "rescue": "Wake, movement, one technical 30-min block, one log, sleep on time."
+  }
+}

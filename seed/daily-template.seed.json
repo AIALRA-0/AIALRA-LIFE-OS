@@ -1,0 +1,218 @@
+{
+  "template_name": "default_03_to_20_half_hour_template",
+  "version": "0.1.0",
+  "slots": [
+    {
+      "start": "03:00",
+      "end": "03:30",
+      "default_domain": "startup",
+      "locked": true
+    },
+    {
+      "start": "03:30",
+      "end": "04:00",
+      "default_domain": "deep_work_or_art_foundation",
+      "locked": false
+    },
+    {
+      "start": "04:00",
+      "end": "04:30",
+      "default_domain": "deep_work_or_art_foundation",
+      "locked": false
+    },
+    {
+      "start": "04:30",
+      "end": "05:00",
+      "default_domain": "deep_work_or_art_foundation",
+      "locked": false
+    },
+    {
+      "start": "05:00",
+      "end": "05:30",
+      "default_domain": "deep_work_or_art_foundation",
+      "locked": false
+    },
+    {
+      "start": "05:30",
+      "end": "06:00",
+      "default_domain": "deep_work_or_art_foundation",
+      "locked": false
+    },
+    {
+      "start": "06:00",
+      "end": "06:30",
+      "default_domain": "health",
+      "locked": true
+    },
+    {
+      "start": "06:30",
+      "end": "07:00",
+      "default_domain": "health",
+      "locked": false
+    },
+    {
+      "start": "07:00",
+      "end": "07:30",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "07:30",
+      "end": "08:00",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "08:00",
+      "end": "08:30",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "08:30",
+      "end": "09:00",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "09:00",
+      "end": "09:30",
+      "default_domain": "meal",
+      "locked": true
+    },
+    {
+      "start": "09:30",
+      "end": "10:00",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "10:00",
+      "end": "10:30",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "10:30",
+      "end": "11:00",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "11:00",
+      "end": "11:30",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "11:30",
+      "end": "12:00",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "12:00",
+      "end": "12:30",
+      "default_domain": "chip_eda",
+      "locked": false
+    },
+    {
+      "start": "12:30",
+      "end": "13:00",
+      "default_domain": "review",
+      "locked": true
+    },
+    {
+      "start": "13:00",
+      "end": "13:30",
+      "default_domain": "business_expression",
+      "locked": false
+    },
+    {
+      "start": "13:30",
+      "end": "14:00",
+      "default_domain": "business_expression",
+      "locked": false
+    },
+    {
+      "start": "14:00",
+      "end": "14:30",
+      "default_domain": "chip_eda_or_ai_agent",
+      "locked": false
+    },
+    {
+      "start": "14:30",
+      "end": "15:00",
+      "default_domain": "chip_eda_or_ai_agent",
+      "locked": false
+    },
+    {
+      "start": "15:00",
+      "end": "15:30",
+      "default_domain": "chip_eda_or_ai_agent",
+      "locked": false
+    },
+    {
+      "start": "15:30",
+      "end": "16:00",
+      "default_domain": "ai_agent",
+      "locked": false
+    },
+    {
+      "start": "16:00",
+      "end": "16:30",
+      "default_domain": "meal",
+      "locked": true
+    },
+    {
+      "start": "16:30",
+      "end": "17:00",
+      "default_domain": "arts",
+      "locked": false
+    },
+    {
+      "start": "17:00",
+      "end": "17:30",
+      "default_domain": "arts",
+      "locked": false
+    },
+    {
+      "start": "17:30",
+      "end": "18:00",
+      "default_domain": "arts",
+      "locked": false
+    },
+    {
+      "start": "18:00",
+      "end": "18:30",
+      "default_domain": "external_feedback_or_admin",
+      "locked": false
+    },
+    {
+      "start": "18:30",
+      "end": "19:00",
+      "default_domain": "review_shutdown",
+      "locked": true
+    },
+    {
+      "start": "19:00",
+      "end": "19:30",
+      "default_domain": "review_shutdown",
+      "locked": false
+    },
+    {
+      "start": "19:30",
+      "end": "20:00",
+      "default_domain": "sleep_routine",
+      "locked": true
+    }
+  ],
+  "compiler_rules": [
+    "Every generated plan must include all required daily domains from core-framework.seed.json.",
+    "Every block must have expected_output and skill_node_ids.",
+    "No plan block may start before 03:00 or end after 20:00.",
+    "Locked anchors cannot be removed; if a conflict exists, the task must wrap around anchors.",
+    "If user adds external appointment, protect sleep/body/food anchors first, then reduce side tracks before reducing chip_eda.",
+    "Every plan must include an explicit rescue version for low energy days."
+  ]
+}

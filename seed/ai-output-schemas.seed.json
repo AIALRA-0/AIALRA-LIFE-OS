@@ -1,0 +1,104 @@
+{
+  "daily_plan_schema": {
+    "type": "object",
+    "required": ["date", "timezone", "day_theme", "risk_level", "anchors", "blocks", "rescue_plan", "success_criteria", "agent_tasks"],
+    "properties": {
+      "date": {"type": "string", "description": "YYYY-MM-DD"},
+      "timezone": {"type": "string"},
+      "day_theme": {"type": "string"},
+      "risk_level": {"type": "string", "enum": ["normal", "fatigue", "high_urge", "overloaded", "recovery"]},
+      "anchors": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["anchor_id", "time", "status", "definition_of_done"],
+          "properties": {
+            "anchor_id": {"type": "string"},
+            "time": {"type": "string"},
+            "status": {"type": "string", "enum": ["planned", "completed", "missed", "adjusted"]},
+            "definition_of_done": {"type": "string"}
+          }
+        }
+      },
+      "blocks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["start", "end", "domain", "title", "method", "expected_output", "skill_node_ids", "resource_ids", "difficulty", "checkin_required"],
+          "properties": {
+            "start": {"type": "string"},
+            "end": {"type": "string"},
+            "domain": {"type": "string"},
+            "title": {"type": "string"},
+            "method": {"type": "string"},
+            "expected_output": {"type": "string"},
+            "skill_node_ids": {"type": "array", "items": {"type": "string"}},
+            "resource_ids": {"type": "array", "items": {"type": "string"}},
+            "difficulty": {"type": "integer", "minimum": 1, "maximum": 5},
+            "checkin_required": {"type": "boolean"}
+          }
+        }
+      },
+      "rescue_plan": {
+        "type": "object",
+        "required": ["trigger", "minimum_actions"],
+        "properties": {
+          "trigger": {"type": "string"},
+          "minimum_actions": {"type": "array", "items": {"type": "string"}}
+        }
+      },
+      "success_criteria": {"type": "array", "items": {"type": "string"}},
+      "agent_tasks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["agent", "input", "output", "deadline", "human_review_required"],
+          "properties": {
+            "agent": {"type": "string"},
+            "input": {"type": "string"},
+            "output": {"type": "string"},
+            "deadline": {"type": "string"},
+            "human_review_required": {"type": "boolean"}
+          }
+        }
+      }
+    }
+  },
+  "execution_log_schema": {
+    "type": "object",
+    "required": ["plan_block_id", "status", "actual_start", "actual_end", "energy", "focus", "note", "artifact_url"],
+    "properties": {
+      "plan_block_id": {"type": "string"},
+      "status": {"type": "string", "enum": ["completed", "partial", "missed", "skipped", "rescheduled"]},
+      "actual_start": {"type": ["string", "null"]},
+      "actual_end": {"type": ["string", "null"]},
+      "energy": {"type": "integer", "minimum": 1, "maximum": 5},
+      "focus": {"type": "integer", "minimum": 1, "maximum": 5},
+      "urge_trigger": {"type": ["string", "null"]},
+      "note": {"type": "string"},
+      "artifact_url": {"type": ["string", "null"]}
+    }
+  },
+  "skill_assessment_schema": {
+    "type": "object",
+    "required": ["date", "updates", "evidence", "risk_flags", "next_recommendations"],
+    "properties": {
+      "date": {"type":"string"},
+      "updates": {
+        "type":"array",
+        "items": {
+          "type":"object",
+          "required":["skill_node_id", "delta", "reason"],
+          "properties": {
+            "skill_node_id":{"type":"string"},
+            "delta":{"type":"number"},
+            "reason":{"type":"string"}
+          }
+        }
+      },
+      "evidence":{"type":"array", "items":{"type":"string"}},
+      "risk_flags":{"type":"array", "items":{"type":"string"}},
+      "next_recommendations":{"type":"array", "items":{"type":"string"}}
+    }
+  }
+}
