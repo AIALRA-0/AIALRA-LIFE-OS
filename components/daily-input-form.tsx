@@ -2,7 +2,7 @@
 
 import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Clipboard, Import, Loader2, PackageOpen } from "lucide-react";
+import { Clipboard, Download, FileText, Import, Loader2, MessageSquareText, PackageOpen } from "lucide-react";
 import { dateOnly } from "@/lib/utils/time";
 
 const numericFields = [
@@ -20,6 +20,13 @@ type PromptPackageResult = {
   dailyInputId: string;
   date: string;
   prompt: string;
+  chatMessage: string;
+  uploadFiles: Array<{
+    filename: string;
+    mimeType: string;
+    description: string;
+    content: string;
+  }>;
   importInstructions: string;
 };
 
@@ -68,10 +75,21 @@ export function DailyInputForm() {
     setMessage("提示包已生成。复制到 ChatGPT Pro 后，把返回 JSON 粘贴到下方导入。");
   }
 
-  async function copyPrompt() {
-    if (!promptPackage) return;
-    await navigator.clipboard.writeText(promptPackage.prompt);
-    setCopyMessage("已复制提示包。");
+  async function copyText(value: string, doneMessage: string) {
+    await navigator.clipboard.writeText(value);
+    setCopyMessage(doneMessage);
+  }
+
+  function downloadUploadFile(file: PromptPackageResult["uploadFiles"][number]) {
+    const blob = new Blob([file.content], { type: file.mimeType });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = file.filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
   }
 
   async function importPlan() {
@@ -195,19 +213,65 @@ export function DailyInputForm() {
         <section className="grid gap-4 rounded border border-white/10 bg-white/[0.035] p-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="text-sm font-semibold text-white">第二步：复制提示包到 ChatGPT Pro</h2>
+              <h2 className="text-sm font-semibold text-white">第二步：上传文件到 ChatGPT Pro</h2>
               <p className="mt-1 text-sm text-muted-foreground">{promptPackage.importInstructions}</p>
             </div>
-            <button
-              type="button"
-              onClick={copyPrompt}
-              className="inline-flex h-10 items-center justify-center gap-2 rounded border border-white/10 px-4 text-sm text-white hover:bg-white/[0.06]"
-            >
-              <Clipboard className="h-4 w-4" />
-              复制提示包
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={() => copyText(promptPackage.chatMessage, "已复制开场消息。")}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded border border-primary/30 px-4 text-sm text-primary hover:bg-primary/10"
+              >
+                <MessageSquareText className="h-4 w-4" />
+                复制开场消息
+              </button>
+              <button
+                type="button"
+                onClick={() => copyText(promptPackage.prompt, "已复制完整提示包。")}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded border border-white/10 px-4 text-sm text-white hover:bg-white/[0.06]"
+              >
+                <Clipboard className="h-4 w-4" />
+                复制完整提示包
+              </button>
+            </div>
           </div>
           {copyMessage ? <p className="text-sm text-primary">{copyMessage}</p> : null}
+
+          <div className="grid gap-3">
+            {promptPackage.uploadFiles.map((file) => (
+              <article
+                key={file.filename}
+                className="grid gap-3 rounded border border-white/10 bg-black/20 p-3 md:grid-cols-[minmax(0,1fr)_auto]"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <span className="truncate font-mono">{file.filename}</span>
+                  </div>
+                  <p className="mt-1 text-sm text-muted-foreground">{file.description}</p>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row md:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => copyText(file.content, `已复制 ${file.filename}。`)}
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded border border-white/10 px-3 text-xs text-white hover:bg-white/[0.06]"
+                  >
+                    <Clipboard className="h-3.5 w-3.5" />
+                    复制内容
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => downloadUploadFile(file)}
+                    className="inline-flex h-9 items-center justify-center gap-2 rounded border border-white/10 px-3 text-xs text-white hover:bg-white/[0.06]"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    下载文件
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+
           <textarea
             readOnly
             value={promptPackage.prompt}

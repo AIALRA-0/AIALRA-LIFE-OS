@@ -58,7 +58,13 @@ export async function POST(request: Request) {
         inputJson: redactSecrets({
           payload,
           lifeContext,
-          prompt: promptPackage.prompt
+          prompt: promptPackage.prompt,
+          chatMessage: promptPackage.chatMessage,
+          uploadFiles: promptPackage.uploadFiles.map((file) => ({
+            filename: file.filename,
+            mimeType: file.mimeType,
+            description: file.description
+          }))
         }) as Prisma.InputJsonValue,
         outputText: "已生成手动 ChatGPT 提示包，等待 JSON 导入。",
         startedAt: new Date()
@@ -71,6 +77,8 @@ export async function POST(request: Request) {
       date: payload.date,
       prompt: promptPackage.prompt,
       schema: promptPackage.schema,
+      chatMessage: promptPackage.chatMessage,
+      uploadFiles: promptPackage.uploadFiles,
       importInstructions: promptPackage.importInstructions
     });
   } catch (error) {
