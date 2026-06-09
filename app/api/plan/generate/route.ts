@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
-import { AgentRunStatus, PlanStatus, Prisma } from "@prisma/client";
-import { z } from "zod";
+import { AgentRunStatus, Prisma } from "@prisma/client";
 import { requireUserProfile, authErrorResponse } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { compilePlannerContext } from "@/lib/plan/compile-context";
+import { DailyPlanInputSchema } from "@/lib/plan/input-schema";
+import { persistGeneratedPlan } from "@/lib/plan/persist-plan";
 import { buildPlannerPrompt, buildResearchPrompt } from "@/lib/plan/prompt";
 import {
   buildFallbackDailyPlan,
@@ -20,94 +21,10 @@ import { toDateAtUtcMidnight } from "@/lib/utils/time";
 
 export const dynamic = "force-dynamic";
 
-const GeneratePlanSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  mustDo: z.string().min(1),
-  temporaryItems: z.string().optional().default(""),
-  specialNeeds: z.string().optional().default(""),
-  sleepQuality: z.coerce.number().int().min(1).max(5).optional(),
-  weightKg: z.coerce.number().positive().optional(),
-  painLevel: z.coerce.number().int().min(0).max(5).optional(),
-  energy: z.coerce.number().int().min(1).max(5).optional(),
-  focus: z.coerce.number().int().min(1).max(5).optional(),
-  anxiety: z.coerce.number().int().min(0).max(5).optional(),
-  urgeRisk: z.coerce.number().int().min(0).max(5).optional(),
-  requiresResearch: z.coerce.boolean().default(false)
-});
-
-async function persistPlan(
-  userId: string,
-  dailyInputId: string,
-  date: Date,
-  plan: GeneratedDailyPlan,
-  createdBy: string
-) {
-  const [dbResources, dbSkills] = await Promise.all([
-    prisma.resource.findMany({ select: { id: true } }),
-    prisma.skillNode.findMany({ select: { id: true } })
-  ]);
-  const dbResourceIds = new Set(dbResources.map((resource) => resource.id));
-  const dbSkillIds = new Set(dbSkills.map((skill) => skill.id));
-
-  await prisma.dailyPlan.updateMany({
-    where: {
-      userId,
-      date,
-      status: { in: [PlanStatus.ACTIVE, PlanStatus.DRAFT] }
-    },
-    data: { status: PlanStatus.ARCHIVED }
-  });
-
-  return prisma.dailyPlan.create({
-    data: {
-      userId,
-      dailyInputId,
-      date,
-      timezone: plan.timezone,
-      title: plan.day_theme,
-      dayTheme: plan.day_theme,
-      riskLevel: plan.risk_level,
-      status: PlanStatus.ACTIVE,
-      aiSummary: `由 ${createdBy} 生成。`,
-      planJson: plan as Prisma.InputJsonValue,
-      rescuePlanJson: plan.rescue_plan as Prisma.InputJsonValue,
-      successCriteria: plan.success_criteria,
-      createdBy,
-      blocks: {
-        create: plan.blocks.map((block, index) => ({
-          startTime: block.start,
-          endTime: block.end,
-          domain: block.domain,
-          title: block.title,
-          method: block.method,
-          expectedOutput: block.expected_output,
-          difficulty: block.difficulty,
-          checkinRequired: block.checkin_required,
-          sortOrder: index,
-          resources: {
-            create: block.resource_ids
-              .filter((resourceId) => dbResourceIds.has(resourceId))
-              .map((resourceId) => ({
-                resource: { connect: { id: resourceId } }
-              }))
-          },
-          skills: {
-            create: block.skill_node_ids
-              .filter((skillNodeId) => dbSkillIds.has(skillNodeId))
-              .map((skillNodeId) => ({
-                skillNode: { connect: { id: skillNodeId } }
-              }))
-          }
-        }))
-      }
-    }
-  });
-}
-
 export async function POST(request: NextRequest) {
   try {
     const user = await requireUserProfile();
-    const payload = await parseJsonBody(request, GeneratePlanSchema);
+    const payload = await parseJsonBody(request, DailyPlanInputSchema);
     const date = toDateAtUtcMidnight(payload.date);
 
     const dailyInput = await prisma.dailyInput.create({
@@ -127,6 +44,9 @@ export async function POST(request: NextRequest) {
           focus: payload.focus,
           anxiety: payload.anxiety,
           urgeRisk: payload.urgeRisk
+        },
+        availableWindows: {
+          externalMessageSummary: payload.externalMessageSummary
         }
       }
     });
@@ -266,7 +186,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const savedPlan = await persistPlan(user.id, dailyInput.id, date, plan, createdBy);
+    const savedPlan = await persistGeneratedPlan({
+      userId: user.id,
+      dailyInputId: dailyInput.id,
+      date,
+      plan,
+      createdBy
+    });
     await prisma.agentRun.update({
       where: { id: agentRun.id },
       data: {

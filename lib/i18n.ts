@@ -46,7 +46,8 @@ const runTypeLabels: Record<string, string> = {
   PlannerAgent: "计划 Agent",
   ResearchAgent: "研究 Agent",
   ReviewAgent: "复盘 Agent",
-  SkillRecomputeAgent: "技能重算 Agent"
+  SkillRecomputeAgent: "技能重算 Agent",
+  ManualPlannerPrompt: "手动计划提示包"
 };
 
 const resourceGroupLabels: Record<string, string> = {

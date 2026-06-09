@@ -12,7 +12,7 @@ export default async function NewPlanPage() {
   return (
     <AppShell
       title="生成计划"
-      subtitle="输入今天必须做的事、临时事项、身体状态、精神状态和研究需求。"
+      subtitle="生成 ChatGPT Pro 提示包，粘贴返回 JSON 后导入今日计划。"
       dateLabel={dateOnly()}
       rightPanel={
         <div className="space-y-4">
@@ -26,6 +26,12 @@ export default async function NewPlanPage() {
               <li>AI Agent 只能加速主线，不能吞掉主线。</li>
               <li>低能量会生成低强度 rescue plan。</li>
             </ul>
+          </div>
+          <div className="rounded border border-white/10 bg-white/[0.035] p-4">
+            <h2 className="text-sm font-semibold text-white">当前生成方式</h2>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">
+              第一阶段不调用 API。系统只整理上下文和 schema，你复制到 ChatGPT Pro，再把 JSON 粘回来校验导入。
+            </p>
           </div>
         </div>
       }

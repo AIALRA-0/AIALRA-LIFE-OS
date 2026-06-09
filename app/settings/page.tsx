@@ -1,5 +1,7 @@
 import { AppShell } from "@/components/app-shell";
+import { LifeContextForm } from "@/components/life-context-form";
 import { SeedImportButton } from "@/components/seed-import-button";
+import { getLifeContext } from "@/lib/life-context";
 import { requirePageUser } from "@/lib/page-auth";
 import { prisma } from "@/lib/prisma";
 
@@ -7,10 +9,11 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const user = await requirePageUser();
-  const [resources, skills, anchors] = await Promise.all([
+  const [resources, skills, anchors, lifeContext] = await Promise.all([
     prisma.resource.count(),
     prisma.skillNode.count(),
-    prisma.anchor.count()
+    prisma.anchor.count(),
+    getLifeContext()
   ]);
 
   const envRows = [
@@ -67,6 +70,8 @@ export default async function SettingsPage() {
           <h2 className="text-sm font-semibold text-white">部署地址</h2>
           <p className="mt-2 font-mono text-sm text-primary">lifeos.aialra.online</p>
         </section>
+
+        <LifeContextForm initialContext={lifeContext} />
       </div>
     </AppShell>
   );
