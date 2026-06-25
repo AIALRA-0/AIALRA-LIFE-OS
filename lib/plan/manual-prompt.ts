@@ -66,7 +66,9 @@ function buildContextSnapshot({
         domainFieldRule:
           "每个 block.domain 必须优先使用 allowedDomainIds 里的精确 id，例如 vocal、dance、music、chip_eda。不要用领域名称替代 id。",
         skillIdRule:
-          "skill_node_ids 只能使用 skillNodes 里真实存在的 id。不要把 domain id 例如 review、music、vocal 当成 skill_node_id。"
+          "skill_node_ids 只能使用 skillNodes 里真实存在的 id。不要把 domain id 例如 review、music、vocal 当成 skill_node_id。",
+        routeBindingRule:
+          "如果 block 来自 routeContext.fixedSlots 或 routeContext.routes，可填写 route_id、route_stage_id、route_week_id、fixed_slot_template_id、course_slot_id、open_agent_slot_id、protected、flexible、route_topic、slot_source。无法确定时留空，不要编造 id。"
       },
       mainlinePriority: context.coreFramework.mainline_priority,
       overloadRules: context.coreFramework.overload_rules,
@@ -107,7 +109,8 @@ function buildContextSnapshot({
         artifactUrl: log.artifactUrl,
         createdAt: log.createdAt,
         block: log.planBlock
-      }))
+      })),
+      routeContext: context.routeContext
     }
   };
 }
@@ -155,6 +158,10 @@ function buildRulesMarkdown() {
     "",
     "- 芯片/EDA 是最高优先级主线，必须有可见产出。",
     "- AI Agent 是支线加速器，只能服务主线，不允许吞掉芯片/EDA。",
+    "- 计划骨架必须优先使用 `lifeos-daily-context.json` 里的 `routeContext.fixedSlots`。",
+    "- 受保护时间片 `protected: true` 不能移动、替换或删除。",
+    "- 根据 `routeContext.routes[].currentStage/currentWeek` 选择当天路线主题，不要重新发明人生路线。",
+    "- 03:30-04:00 必须是 Body Activation Route；07:00-08:00 必须是 Movement Training Route 或安全降级版。",
     "- 外部消息摘要里的紧急事项可以插入，但不能破坏睡眠边界和每日必需领域。",
     "",
     "## 产出规则",

@@ -10,7 +10,11 @@ export default async function SkillsPage() {
   const skills = await prisma.skillNode.findMany({
     orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     include: {
-      _count: { select: { evidence: true } }
+      routeEvidenceNodes: {
+        orderBy: [{ updatedAt: "desc" }],
+        take: 1
+      },
+      _count: { select: { evidence: true, routeEvidenceNodes: true } }
     }
   });
 
@@ -38,7 +42,10 @@ export default async function SkillsPage() {
           currentLevel: skill.currentLevel,
           targetLevel: skill.targetLevel,
           evidenceRequired: skill.evidenceRequired,
-          evidenceCount: skill._count.evidence
+          evidenceCount: skill._count.evidence,
+          routeEvidenceCount: skill._count.routeEvidenceNodes,
+          nextGate: skill.routeEvidenceNodes[0]?.nextGate ?? null,
+          confidence: skill.routeEvidenceNodes[0]?.confidence ?? null
         }))}
       />
     </AppShell>

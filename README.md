@@ -86,6 +86,8 @@ Import seed:
 
 ```bash
 npm run seed:import
+npm run seed:routes
+npm run seed:body-routes
 ```
 
 You can also sign in and use `/settings` > Import seed.
@@ -129,6 +131,18 @@ npm run build
 6. Generate the evening review at `/review/daily`.
 7. Inspect resources, skill tree, and agent runs.
 
+## Cognitive Route Engine
+
+The v1 route engine adds deterministic long-term routes on top of the daily plan loop:
+
+- `/routes` shows all active cognitive routes, stages, current week, and evidence nodes.
+- `/routes/current` shows today's fixed time slots, current route weeks, body routes, course slot form, repair form, and Codex sidecar queue.
+- `npm run seed:routes` imports Chip/EDA, AI Systems, Business, Body, Vocal, Dance, and Music routes.
+- `npm run seed:body-routes` imports Body Activation and Movement Training routes.
+- Daily fallback planning uses fixed slots and current route weeks even when no API key is configured.
+- Repair Plan converts flexible conflicting blocks into audited OpenAgentSlot blocks without moving protected anchors.
+- Body check-ins write `BodyCheckin` rows for activation/training/diet evidence.
+
 ## AI Behavior
 
 - Normal planning uses OpenAI Responses structured output with Zod validation.
@@ -143,7 +157,16 @@ npm run test
 npm run typecheck
 npm run lint
 npm run build
-DATABASE_URL='<database-url-without-inline-credentials>' DIRECT_URL='<database-url-without-inline-credentials>' npx prisma validate
+npx prisma validate
+```
+
+Route seed and deployment checks:
+
+```bash
+npx prisma migrate deploy
+npm run seed:import
+npm run seed:routes
+npm run seed:body-routes
 ```
 
 ## TODO

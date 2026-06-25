@@ -1,0 +1,233 @@
+{
+  "version": "1.0.0",
+  "routes": [
+    {
+      "name": "Body Activation Route",
+      "subtitle": "Spine-Hip-Shoulder-Neck Activation Route",
+      "description": "脊柱-髋-肩颈激活路线。每天 03:30-04:00 进入技术认知主线前，降低久坐、腰臀僵硬、肩颈紧张对认知主线的干扰。",
+      "domain": "Body",
+      "status": "ACTIVE",
+      "fixed_slot": {
+        "start_time": "03:30",
+        "end_time": "04:00",
+        "slot_type": "BODY_ACTIVATION",
+        "title": "身体激活",
+        "protected": true,
+        "flexible": false,
+        "default_rule": "执行 Breathing / Neck-Shoulder / Spine-Hip / Glute-Core / Gait Reset 五段协议。"
+      },
+      "daily_structure": [
+        { "start": "03:30", "end": "03:35", "segment": "Breathing / Brace Reset" },
+        { "start": "03:35", "end": "03:40", "segment": "Neck / Shoulder Reset" },
+        { "start": "03:40", "end": "03:47", "segment": "Spine / Hip Mobility" },
+        { "start": "03:47", "end": "03:55", "segment": "Glute / Core Activation" },
+        { "start": "03:55", "end": "04:00", "segment": "Gait Reset" }
+      ],
+      "action_library": {
+        "Breathing / Brace Reset": ["90/90 breathing", "neutral spine breathing", "brace reset"],
+        "Neck / Shoulder Reset": ["chin tuck", "neck CARs", "scapular retraction", "wall slide"],
+        "Spine / Hip Mobility": ["cat-cow", "kneeling back extension", "90/90 hip switch", "hip flexor pulse"],
+        "Glute / Core Activation": ["glute bridge", "dead bug", "bird dog", "short lever side plank"],
+        "Gait Reset": ["ankle circles", "standing march", "3-minute easy walk"]
+      },
+      "stages": [
+        {
+          "order": 1,
+          "name": "Pain-control baseline",
+          "weeks": 4,
+          "objective": "建立每日腰臀肩颈扫描与低强度动作习惯。",
+          "completion_standard": "连续 20 天完成激活；pain_after 不高于 pain_before；能记录 neck/hip/lumbar 信号。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 2,
+          "name": "Spine-hip stability",
+          "weeks": 4,
+          "objective": "稳定臀桥、dead bug、bird dog、side plank。",
+          "completion_standard": "每个核心动作能以低疼痛、稳定呼吸完成基础组数。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 3,
+          "name": "Shoulder-neck integration",
+          "weeks": 4,
+          "objective": "加入肩胛、颈椎、胸椎控制。",
+          "completion_standard": "肩颈紧张可被 1-5 分稳定记录，训练前后有改善趋势。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 4,
+          "name": "Dynamic mobility",
+          "weeks": 4,
+          "objective": "让髋、踝、胸椎动作更流畅，为跑步和舞蹈做准备。",
+          "completion_standard": "早晨身体启动后能无明显僵硬进入主线深工。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 5,
+          "name": "Running and dance support",
+          "weeks": 4,
+          "objective": "激活路线直接服务跑步和舞蹈协调。",
+          "completion_standard": "跑步日前激活完成率达到 90%，舞蹈前髋肩状态稳定。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 6,
+          "name": "Maintenance protocol",
+          "weeks": 4,
+          "objective": "固化为终身 30 分钟晨间身体启动协议。",
+          "completion_standard": "用户能在不依赖临时决策的情况下完成 03:30-04:00 身体启动。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "evidence_nodes": [
+        { "name": "Spine-Hip-Shoulder-Neck Activation", "track": "Activation", "current_level": 0, "next_gate": "连续 7 天完成 03:30 激活并记录 pain_before / pain_after", "required_artifact": "7-day activation completion log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Breathing / Brace Reset", "track": "Activation", "current_level": 0, "next_gate": "完成 7 天 breathing/brace reset 记录", "required_artifact": "pain_before / pain_after trend", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Neck / Scapular Reset", "track": "Activation", "current_level": 0, "next_gate": "记录 shoulder/neck tension 趋势", "required_artifact": "morning stiffness score trend", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Spine / Hip Mobility", "track": "Activation", "current_level": 0, "next_gate": "完成 30 秒 form check 视频或文字记录", "required_artifact": "weekly 30-second form check video", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Glute Activation", "track": "Activation", "current_level": 0, "next_gate": "完成臀桥/鸟狗/死虫低疼痛动作记录", "required_artifact": "activation set log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Core Anti-extension", "track": "Activation", "current_level": 0, "next_gate": "记录 dead bug / side plank 稳定性", "required_artifact": "core control log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Morning Gait Reset", "track": "Activation", "current_level": 0, "next_gate": "记录 3 分钟 easy walk 或 standing march", "required_artifact": "morning gait reset log", "confidence": 0, "linked_resource_urls": [] }
+      ]
+    },
+    {
+      "name": "Movement Training Route",
+      "subtitle": "Aerobic-Calisthenics-Coordination Route",
+      "description": "心肺-街健-协调性路线。每天 07:00-08:00 建立长期减脂、心肺、无器械力量、核心稳定、跑步基础、舞蹈协调支持。",
+      "domain": "Body",
+      "status": "ACTIVE",
+      "fixed_slot": {
+        "start_time": "07:00",
+        "end_time": "08:00",
+        "slot_type": "MOVEMENT_TRAINING",
+        "title": "运动训练",
+        "protected": true,
+        "flexible": true,
+        "default_rule": "按星期模板训练；低能量、高疼痛或高疲劳时自动降级为恢复步行与轻 mobility。"
+      },
+      "weekly_template": [
+        {
+          "day": "Monday",
+          "theme": "Zone 2 run-walk / track",
+          "structure": ["10 min warm-up walk", "30 min run-walk interval", "10 min cool-down walk", "10 min hip/calf/glute release"]
+        },
+        {
+          "day": "Tuesday",
+          "theme": "Bodyweight Strength A",
+          "structure": ["bodyweight squat", "incline push-up", "glute bridge", "dead bug", "calf raise", "front plank or short side plank"]
+        },
+        {
+          "day": "Wednesday",
+          "theme": "Recovery aerobic + mobility",
+          "structure": ["45 min brisk walk", "15 min hip/ankle/thoracic/shoulder mobility"]
+        },
+        {
+          "day": "Thursday",
+          "theme": "Bodyweight Strength B",
+          "structure": ["reverse lunge", "hip hinge / good morning", "scapular push-up", "prone Y-T-W", "bird dog", "side plank"]
+        },
+        {
+          "day": "Friday",
+          "theme": "Running technique / light intervals",
+          "structure": ["10 min warm-up walk", "20 min run-walk", "10 min cadence / gait practice", "10 min cool-down walk", "10 min stretch"]
+        },
+        {
+          "day": "Saturday",
+          "theme": "Long walk / hike / optional climbing",
+          "structure": ["60-120 min low intensity walk or hike", "optional light mobility"]
+        },
+        {
+          "day": "Sunday",
+          "theme": "Recovery / assessment",
+          "structure": ["30-45 min easy walk", "10 min activation", "weight / waist / pain / fatigue review"]
+        }
+      ],
+      "stages": [
+        {
+          "order": 1,
+          "name": "Adaptation Base",
+          "weeks": 4,
+          "objective": "每天动起来，建立跑走和街健基础，不追求强度。",
+          "completion_standard": "每周完成 5 天训练；无连续疼痛升级；跑走间歇可完成。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 2,
+          "name": "Capacity Build",
+          "weeks": 4,
+          "objective": "增加跑走总量和街健动作稳定性。",
+          "completion_standard": "每周累计 150 分钟以上中等强度活动；完成 2 次力量训练。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 3,
+          "name": "Strength + Aerobic Base",
+          "weeks": 4,
+          "objective": "俯卧撑、深蹲、弓步、核心进入可量化。",
+          "completion_standard": "能记录固定动作组数和 RPE，动作稳定无明显疼痛。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 4,
+          "name": "Fat-loss Volume",
+          "weeks": 4,
+          "objective": "提高总步数、总训练分钟、稳定体重下降。",
+          "completion_standard": "每周运动总分钟稳定，体重/腰围趋势可追踪。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 5,
+          "name": "Coordination Integration",
+          "weeks": 4,
+          "objective": "加入舞蹈支持、轻敏捷、脚步协调。",
+          "completion_standard": "跑步、舞蹈、灵活性之间不互相拖累。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 6,
+          "name": "Athletic Maintenance",
+          "weeks": 4,
+          "objective": "固化长期可维持的运动系统。",
+          "completion_standard": "用户能按周模板稳定训练，并根据 pain/fatigue 自动降级。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "evidence_nodes": [
+        { "name": "Movement Training", "track": "Movement", "current_level": 0, "next_gate": "完成每周 5 天运动记录", "required_artifact": "weekly training completion", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Aerobic Base", "track": "Movement", "current_level": 0, "next_gate": "完成 3 次 Zone 2 或快走记录", "required_artifact": "weekly aerobic log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Run-Walk Progression", "track": "Movement", "current_level": 0, "next_gate": "记录 run-walk interval", "required_artifact": "run-walk interval log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Bodyweight Strength", "track": "Movement", "current_level": 0, "next_gate": "记录固定动作组数和 RPE", "required_artifact": "bodyweight strength set log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Core Stability", "track": "Movement", "current_level": 0, "next_gate": "记录 plank / dead bug / bird dog 控制", "required_artifact": "core stability log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Hip / Ankle Mobility", "track": "Movement", "current_level": 0, "next_gate": "记录 hip/ankle mobility 变化", "required_artifact": "mobility trend log", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Dance Coordination Support", "track": "Movement", "current_level": 0, "next_gate": "记录舞蹈前后协调性和疼痛变化", "required_artifact": "dance support note", "confidence": 0, "linked_resource_urls": [] },
+        { "name": "Body Composition Control", "track": "Movement", "current_level": 0, "next_gate": "记录体重/腰围/训练分钟趋势", "required_artifact": "weight / waist trend", "confidence": 0, "linked_resource_urls": [] }
+      ]
+    }
+  ],
+  "safety_rules": {
+    "rescue_triggers": {
+      "pain_level_gte": 4,
+      "fatigue_gte": 4,
+      "energy_lte": 2,
+      "anxiety_gte": 4,
+      "urge_risk_gte": 4
+    },
+    "movement_rescue": [
+      "20-30 min easy walk",
+      "10 min hip/ankle/shoulder mobility",
+      "No running intervals",
+      "No max strength work"
+    ],
+    "activation_rescue": [
+      "90/90 breathing",
+      "cat-cow",
+      "glute bridge",
+      "3-minute easy walk"
+    ]
+  },
+  "diet_default": {
+    "foods": ["romaine lettuce", "boiled eggs", "chicken thigh or beef patty", "bread as main carb", "Greek yogurt", "chia seeds", "frozen blueberries", "small amount of nuts", "boiled broccoli"],
+    "supplements": ["fish oil", "magnesium", "creatine", "One A Day", "vitamin C", "vitamin D"],
+    "checkin_fields": ["protein_ok", "vegetable_ok", "fruit_ok", "carb_ok", "supplements_taken", "overeating_or_not"]
+  }
+}

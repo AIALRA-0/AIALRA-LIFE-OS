@@ -13,7 +13,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "seed:import": "tsx scripts/import-seed.ts"
+    "seed:import": "tsx scripts/import-seed.ts",
+    "seed:routes": "tsx scripts/import-cognitive-routes.ts",
+    "seed:body-routes": "tsx scripts/import-body-routes.ts"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",

@@ -9,6 +9,14 @@ import { zhDomain, zhStatus } from "@/lib/i18n";
 
 const statuses = ["COMPLETED", "PARTIAL", "MISSED", "SKIPPED", "RESCHEDULED"];
 
+function getBodyMode(block: TimelineBlock | null) {
+  const marker = `${block?.domain ?? ""} ${block?.title ?? ""} ${block?.route?.name ?? ""}`.toLowerCase();
+  if (marker.includes("movement") || marker.includes("运动训练")) return "movement";
+  if (marker.includes("activation") || marker.includes("身体激活")) return "activation";
+  if (marker.includes("diet") || marker.includes("餐")) return "diet";
+  return null;
+}
+
 export function CheckinDialog({
   block,
   open,
@@ -28,15 +36,39 @@ export function CheckinDialog({
     if (!block) return;
 
     const formData = new FormData(event.currentTarget);
+    const mode = getBodyMode(block);
+    const bodyBool = (name: string) => (mode ? formData.get(name) === "on" : null);
     const payload = {
       status,
       actualStart: formData.get("actualStart") || null,
       actualEnd: formData.get("actualEnd") || null,
+      actualMinutes: formData.get("actualMinutes") || null,
       energy: Number(formData.get("energy") ?? 3),
       focus: Number(formData.get("focus") ?? 3),
+      painOrFatigue: formData.get("painOrFatigue") || null,
+      distractionLevel: formData.get("distractionLevel") || null,
       urgeTrigger: formData.get("urgeTrigger") || null,
       note: String(formData.get("note") ?? ""),
-      artifactUrl: formData.get("artifactUrl") || null
+      artifactUrl: formData.get("artifactUrl") || null,
+      painBefore: formData.get("painBefore") || null,
+      painAfter: formData.get("painAfter") || null,
+      stiffnessBefore: formData.get("stiffnessBefore") || null,
+      stiffnessAfter: formData.get("stiffnessAfter") || null,
+      hipTightness: formData.get("hipTightness") || null,
+      neckShoulderTension: formData.get("neckShoulderTension") || null,
+      lumbarSignal: formData.get("lumbarSignal") || null,
+      activationCompleted: bodyBool("activationCompleted"),
+      trainingType: formData.get("trainingType") || null,
+      durationMinutes: formData.get("durationMinutes") || null,
+      distanceOrSteps: formData.get("distanceOrSteps") || null,
+      setsCompleted: formData.get("setsCompleted") || null,
+      rpe: formData.get("rpe") || null,
+      fatigueAfter: formData.get("fatigueAfter") || null,
+      zone2Completed: bodyBool("zone2Completed"),
+      strengthCompleted: bodyBool("strengthCompleted"),
+      mobilityCompleted: bodyBool("mobilityCompleted"),
+      evidenceText: formData.get("evidenceText") || null,
+      evidenceUrl: formData.get("evidenceUrl") || null
     };
 
     setMessage("");
@@ -55,6 +87,8 @@ export function CheckinDialog({
     onOpenChange(false);
     startTransition(() => router.refresh());
   }
+
+  const bodyMode = getBodyMode(block);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -132,7 +166,141 @@ export function CheckinDialog({
                   className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white"
                 />
               </label>
+              <label className="grid gap-1 text-sm text-muted-foreground">
+                实际分钟
+                <input
+                  name="actualMinutes"
+                  type="number"
+                  min="0"
+                  max="1020"
+                  placeholder="可不填"
+                  className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white"
+                />
+              </label>
+              <label className="grid gap-1 text-sm text-muted-foreground">
+                疼痛/疲劳
+                <input
+                  name="painOrFatigue"
+                  type="number"
+                  min="0"
+                  max="5"
+                  placeholder="0-5"
+                  className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white"
+                />
+              </label>
+              <label className="grid gap-1 text-sm text-muted-foreground">
+                分心水平
+                <input
+                  name="distractionLevel"
+                  type="number"
+                  min="0"
+                  max="5"
+                  placeholder="0-5"
+                  className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white"
+                />
+              </label>
             </div>
+
+            {bodyMode ? (
+              <section className="rounded border border-white/10 bg-black/18 p-3">
+                <h3 className="text-sm font-semibold text-white">
+                  {bodyMode === "movement" ? "运动训练记录" : bodyMode === "activation" ? "身体激活记录" : "饮食记录"}
+                </h3>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  <label className="grid gap-1 text-sm text-muted-foreground">
+                    pain before
+                    <input name="painBefore" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                  </label>
+                  <label className="grid gap-1 text-sm text-muted-foreground">
+                    pain after
+                    <input name="painAfter" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                  </label>
+                  <label className="grid gap-1 text-sm text-muted-foreground">
+                    僵硬 after
+                    <input name="stiffnessAfter" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                  </label>
+                </div>
+
+                {bodyMode === "activation" ? (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-4">
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      僵硬 before
+                      <input name="stiffnessBefore" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      髋紧张
+                      <input name="hipTightness" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      肩颈紧张
+                      <input name="neckShoulderTension" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      腰椎信号
+                      <input name="lumbarSignal" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <input name="activationCompleted" type="checkbox" defaultChecked className="h-4 w-4 accent-primary" />
+                      激活完成
+                    </label>
+                  </div>
+                ) : null}
+
+                {bodyMode === "movement" ? (
+                  <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      训练类型
+                      <input name="trainingType" placeholder="run-walk / strength / recovery" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      训练分钟
+                      <input name="durationMinutes" type="number" min="0" max="300" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      RPE
+                      <input name="rpe" type="number" min="0" max="10" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      距离/步数
+                      <input name="distanceOrSteps" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      完成组数
+                      <input name="setsCompleted" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <label className="grid gap-1 text-sm text-muted-foreground">
+                      fatigue after
+                      <input name="fatigueAfter" type="number" min="0" max="5" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                    </label>
+                    <div className="flex flex-wrap gap-4 sm:col-span-3">
+                      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <input name="zone2Completed" type="checkbox" className="h-4 w-4 accent-primary" />
+                        Zone2
+                      </label>
+                      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <input name="strengthCompleted" type="checkbox" className="h-4 w-4 accent-primary" />
+                        力量
+                      </label>
+                      <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <input name="mobilityCompleted" type="checkbox" className="h-4 w-4 accent-primary" />
+                        Mobility
+                      </label>
+                    </div>
+                  </div>
+                ) : null}
+
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  <label className="grid gap-1 text-sm text-muted-foreground">
+                    证据文字
+                    <input name="evidenceText" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                  </label>
+                  <label className="grid gap-1 text-sm text-muted-foreground">
+                    证据链接
+                    <input name="evidenceUrl" className="h-10 rounded border border-white/10 bg-black/24 px-3 text-white" />
+                  </label>
+                </div>
+              </section>
+            ) : null}
 
             <label className="grid gap-1 text-sm text-muted-foreground">
               冲动 / 过载触发点

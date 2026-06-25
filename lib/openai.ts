@@ -2,7 +2,10 @@ import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import type { DailyInput } from "@prisma/client";
 import type { PlannerContext } from "@/lib/plan/compile-context";
-import { buildHalfHourSlots } from "@/lib/utils/time";
+import { formatBodyActivationMethod } from "@/lib/body/activation-template";
+import { evaluateBodySafety } from "@/lib/body/safety-rules";
+import { formatMovementTrainingMethod } from "@/lib/body/movement-template";
+import { buildHalfHourSlots, timeToMinutes } from "@/lib/utils/time";
 import {
   GeneratedDailyPlanSchema,
   type GeneratedDailyPlan
@@ -118,6 +121,82 @@ function skillIdsFor(context: PlannerContext, matcher: (node: string) => boolean
     .map((node) => node.id);
 }
 
+function slotContains(slot: { startTime: string; endTime: string }, block: { start: string; end: string }) {
+  return timeToMinutes(slot.startTime) < timeToMinutes(block.end) &&
+    timeToMinutes(block.start) < timeToMinutes(slot.endTime);
+}
+
+function normalizeRouteDomain(domain?: string | null) {
+  const value = (domain ?? "").toLowerCase();
+  if (value.includes("chip")) return "chip_eda";
+  if (value.includes("ai")) return "ai_agent";
+  if (value.includes("business")) return "business";
+  if (value.includes("diet")) return "diet";
+  if (value.includes("vocal")) return "vocal";
+  if (value.includes("dance")) return "dance";
+  if (value.includes("music")) return "music";
+  if (value.includes("body")) return "health";
+  if (value.includes("life")) return "review";
+  return null;
+}
+
+function routeForSlot(context: PlannerContext, slot: { slotType: string; routeDomain?: string | null; title: string }) {
+  if (slot.slotType === "BODY_ACTIVATION") {
+    return context.routeContext.routes.find((route) => route.name === "Body Activation Route") ?? null;
+  }
+  if (slot.slotType === "MOVEMENT_TRAINING") {
+    return context.routeContext.routes.find((route) => route.name === "Movement Training Route") ?? null;
+  }
+
+  const normalized = normalizeRouteDomain(slot.routeDomain);
+  if (normalized === "chip_eda") {
+    return context.routeContext.routes.find((route) => route.domain === "Chip/EDA") ?? null;
+  }
+  if (normalized === "ai_agent") {
+    return context.routeContext.routes.find((route) => route.domain === "AI Systems") ?? null;
+  }
+  if (normalized === "business") {
+    return context.routeContext.routes.find((route) => route.domain === "Business") ?? null;
+  }
+  if (normalized === "vocal" || normalized === "dance" || normalized === "music") {
+    return context.routeContext.routes.find((route) => route.domain.toLowerCase() === normalized) ?? null;
+  }
+
+  return null;
+}
+
+function idsForFallbackDomain(context: PlannerContext, domain: string) {
+  const skillMatchers: Record<string, string[]> = {
+    health: ["body", "sleep", "diet", "training", "body_activation", "movement"],
+    diet: ["diet", "body"],
+    vocal: ["vocal", "arts"],
+    dance: ["dance", "arts"],
+    music: ["music", "music_production", "arts"],
+    chip_eda: ["chip_eda", "verification", "digital_ic", "open_source_eda", "riscv_soc"],
+    ai_agent: ["ai_agent", "lifeos_product"],
+    business: ["business", "finance", "management", "strategy"],
+    external_feedback: ["social_expression", "job_pipeline"],
+    review: ["lifeos_product", "root"]
+  };
+  const resourceMatchers: Record<string, string[]> = {
+    vocal: ["vocal", "estill", "cvt"],
+    dance: ["dance", "steezy"],
+    music: ["music", "soundgym", "fl studio", "berklee"],
+    chip_eda: ["eda", "rtl", "verification", "verilog", "risc-v", "openroad"],
+    ai_agent: ["openai", "ai", "next.js", "supabase"],
+    business: ["business", "finance", "management", "yc", "damodaran", "wharton"],
+    external_feedback: ["career", "toastmasters"],
+    review: ["lifeos"]
+  };
+  const skillTokens = skillMatchers[domain] ?? ["root"];
+  const resourceTokens = resourceMatchers[domain] ?? [];
+
+  return {
+    skillIds: skillIdsFor(context, (node) => skillTokens.some((token) => node.includes(token))),
+    resourceIds: resourceIdsFor(context, (tags) => resourceTokens.some((token) => tags.includes(token)))
+  };
+}
+
 export function buildFallbackDailyPlan(
   dailyInput: DailyInput,
   context: PlannerContext,
@@ -131,80 +210,114 @@ export function buildFallbackDailyPlan(
     (mentalStatus.anxiety ?? 0) >= 4 ||
     (mentalStatus.urgeRisk ?? 0) >= 4;
 
-  const chipResources = resourceIdsFor(context, (tags) =>
-    ["eda", "rtl", "verification", "verilog", "risc-v", "openroad"].some((tag) =>
-      tags.includes(tag)
-    )
-  );
-  const aiResources = resourceIdsFor(context, (tags) => tags.includes("openai") || tags.includes("ai"));
-  const artsResources = resourceIdsFor(context, (tags) =>
-    ["vocal", "dance", "music", "ear-training"].some((tag) => tags.includes(tag))
-  );
-  const businessResources = resourceIdsFor(context, (tags) =>
-    ["business", "finance", "management"].some((tag) => tags.includes(tag))
-  );
-
-  const chipSkills = skillIdsFor(context, (node) =>
-    ["chip_eda", "verification", "digital_ic", "open_source_eda"].some((id) =>
-      node.includes(id)
-    )
-  );
-  const healthSkills = skillIdsFor(context, (node) =>
-    ["body", "sleep", "diet", "training"].some((id) => node.includes(id))
-  );
-  const artsSkills = skillIdsFor(context, (node) =>
-    ["arts", "vocal", "dance", "music"].some((id) => node.includes(id))
-  );
-  const aiSkills = skillIdsFor(context, (node) => node.includes("ai_agent"));
-  const businessSkills = skillIdsFor(context, (node) => node.includes("business"));
-  const reviewSkills = skillIdsFor(context, (node) => node.includes("lifeos") || node.includes("review"));
+  const bodySafety = evaluateBodySafety({
+    painLevel: bodyStatus.painLevel,
+    energy: bodyStatus.energy,
+    anxiety: mentalStatus.anxiety,
+    urgeRisk: mentalStatus.urgeRisk
+  });
 
   const blocks = buildHalfHourSlots().map((slot, index) => {
-    const blockMap = [
-      ["startup", "起床启动与身体读数", "喝水、洗漱、记录睡眠/体重/疼痛", "完成启动记录", healthSkills, []],
-      ["review", "确认今日约束", "把必须事项写进计划输入并锁定20:00睡眠", "今日硬约束清单", reviewSkills, []],
-      ["chip_eda", "芯片/EDA主线深工 1", "阅读/实现一个最小技术单元", "一个repo commit或技术笔记", chipSkills, chipResources],
-      ["chip_eda", "芯片/EDA主线深工 2", "继续主线实验，记录失败点", "可复现实验记录", chipSkills, chipResources],
-      ["chip_eda", "芯片/EDA主线深工 3", "补测试或波形/报告", "测试结果或截图", chipSkills, chipResources],
-      ["health", "低刺激运动", rescue ? "步行+核心稳定" : "跑走结合+核心训练", "运动记录与疼痛评分", healthSkills, []],
-      ["health", "恢复与拉伸", "腰椎友好拉伸、补水、整理训练感受", "恢复记录", healthSkills, []],
-      ["diet", "第一顿饭", "蛋白+主食+蔬菜，记录饮食", "饮食记录", healthSkills, []],
-      ["chip_eda", "芯片/EDA主线深工 4", "聚焦验证/RTL/EDA工具链产物", "主线产物增量", chipSkills, chipResources],
-      ["chip_eda", "芯片/EDA主线深工 5", "运行或复盘一个工具链步骤", "命令/日志摘要", chipSkills, chipResources],
-      ["chip_eda", "芯片/EDA主线深工 6", "把失败点转为下一步测试", "issue或todo记录", chipSkills, chipResources],
-      ["chip_eda", "芯片/EDA主线深工 7", "完成一个可展示切片", "可见技术证据", chipSkills, chipResources],
-      ["review", "主线中段审计", "确认今天芯片/EDA是否已有可见产物", "中段审计结论", reviewSkills, []],
-      ["business", "商业/金融/表达", "学习一个概念并口述输出", "150字表达或录音", businessSkills, businessResources],
-      ["business", "管理表达练习", "将技术产物讲给非技术听众", "表达稿或录音", businessSkills, businessResources],
-      ["ai_agent", "AI Agent支线", "只做能加速主线的工作流", "一个prompt/脚本/自动化片段", aiSkills, aiResources],
-      ["chip_eda", "主线补产物", "补齐今天最小可验证技术证据", "commit/笔记/截图之一", chipSkills, chipResources],
-      ["ai_agent", "Agent审计", "检查AI输出是否服务主线", "agent审计记录", aiSkills, aiResources],
-      ["music", "音乐制作/耳训", "SoundGym/FL Studio最小练习", "练习截图或音频片段", artsSkills, artsResources],
-      ["diet", "第二顿饭", "清淡晚饭，记录饮食与过载风险", "晚饭记录", healthSkills, []],
-      ["vocal", "声乐", "Estill/CVT小练习，低刺激录音", "30秒声乐记录", artsSkills, artsResources],
-      ["dance", "舞蹈", "基础动作或编舞片段", "30秒视频或动作清单", artsSkills, artsResources],
-      ["external_feedback", "外部反馈/行政", "处理一个求职、人际或行政节点", "发送/整理/记录一个外部动作", reviewSkills, []],
-      ["review", "日结准备", "整理执行日志、产出物和风险", "日结素材", reviewSkills, []],
-      ["review", "技能树更新", "把证据挂到技能节点", "技能证据记录", reviewSkills, []],
-      ["review", "明日材料准备", "只准备材料，不开新战线", "明日第一块材料", reviewSkills, []],
-      ["review", "关机降刺激", "屏幕降刺激，洗漱，确认20:00睡眠", "关机清单", healthSkills, []],
-      ["review", "睡眠例行", "上床关灯，不补偿未完成任务", "20:00睡眠执行", healthSkills, []]
-    ] as const;
+    const fixedSlot = context.routeContext.fixedSlots.find((candidate) =>
+      slotContains(candidate, slot)
+    );
+    const slotType = fixedSlot?.slotType ?? "OPEN_AGENT_SLOT";
+    const route = fixedSlot ? routeForSlot(context, fixedSlot) : null;
+    const normalizedDomain = normalizeRouteDomain(fixedSlot?.routeDomain);
+    const domain =
+      slotType === "COURSE_SLOT" || slotType === "OPEN_AGENT_SLOT"
+        ? "external_feedback"
+        : normalizedDomain ?? (slotType === "SHUTDOWN" ? "review" : "review");
+    const ids = idsForFallbackDomain(context, domain);
+    const fallbackSkillIds =
+      ids.skillIds.length > 0 ? ids.skillIds : [pickFirstId(context.skillNodes.map((node) => node.id), "root")];
 
-    const mapped = blockMap[Math.min(index, blockMap.length - 1)];
-    const [domain, title, method, expectedOutput, skillIds, resourceIds] = mapped;
+    let title = fixedSlot?.title ?? "开放处理块";
+    let method = fixedSlot?.defaultRule ?? "处理当前最重要的低风险任务。";
+    let expectedOutput = "完成本时间片记录。";
+    let difficulty = rescue ? 2 : 3;
+
+    if (slotType === "BODY_ACTIVATION") {
+      title = "身体激活：脊柱-髋-肩颈";
+      method = bodySafety.rescueMode
+        ? `Rescue：${bodySafety.activationPlan.join("；")}`
+        : formatBodyActivationMethod();
+      expectedOutput = "pain_before / pain_after / stiffness 记录。";
+      difficulty = 1;
+    } else if (slotType === "MOVEMENT_TRAINING") {
+      title = bodySafety.rescueMode ? "运动训练：安全降级" : "运动训练：心肺-街健-协调";
+      method = bodySafety.rescueMode
+        ? `Rescue：${bodySafety.movementPlan.join("；")}`
+        : formatMovementTrainingMethod(dailyInput.date);
+      expectedOutput = "训练分钟、RPE、pain_before / pain_after / fatigue_after 记录。";
+      difficulty = bodySafety.rescueMode ? 1 : 3;
+    } else if (slotType === "FIXED_ROUTE" || slotType === "PARALLEL_ROUTE") {
+      const weekTitle = route?.currentWeek?.title;
+      title = `${fixedSlot?.title ?? "路线推进"}${weekTitle ? `：${weekTitle}` : ""}`;
+      method = route?.currentWeek?.theme ?? fixedSlot?.defaultRule ?? "推进当前路线周主题。";
+      expectedOutput =
+        route?.currentWeek?.expectedEvidence
+          ? `产出证据：${JSON.stringify(route.currentWeek.expectedEvidence)}`
+          : "完成一个可验证路线证据。";
+      difficulty = rescue && domain === "chip_eda" ? 3 : rescue ? 2 : 4;
+    } else if (slotType === "MEAL") {
+      title = fixedSlot?.title ?? "饮食";
+      method = "按默认饮食：蛋白质、蔬菜、主碳水、蓝莓/坚果/西兰花和补剂检查。";
+      expectedOutput = "protein_ok / vegetable_ok / fruit_ok / carb_ok / supplements_taken 记录。";
+      difficulty = 1;
+    } else if (slotType === "ART_SLOT") {
+      expectedOutput =
+        domain === "vocal"
+          ? "30-60 秒声乐录音或 phrase analysis。"
+          : domain === "dance"
+            ? "30 秒舞蹈视频或动作清单。"
+            : "8-bar loop、导出音频或耳训记录。";
+      difficulty = rescue ? 1 : 2;
+    } else if (slotType === "COURSE_SLOT") {
+      title = fixedSlot?.title ?? "课程";
+      method = "上课 / 整理课堂输入，并提取一个可进入路线的证据。";
+      expectedOutput = "课程笔记、问题清单或作业下一步。";
+      difficulty = 3;
+    } else if (slotType === "OPEN_AGENT_SLOT") {
+      title = fixedSlot?.title ?? "OpenSlot 外部事项";
+      method = fixedSlot?.reason
+        ? `处理插入事项：${fixedSlot.reason}`
+        : "处理外联、行政、课程缓冲或 Repair Plan 插入事项。";
+      expectedOutput = "完成一个外部动作，并记录是否影响今日路线。";
+      difficulty = rescue ? 1 : 2;
+    } else if (slotType === "SHUTDOWN") {
+      title = "下线/洗漱/睡眠准备";
+      method = "屏幕降刺激，洗漱，上床，不补偿未完成任务。";
+      expectedOutput = "20:00 睡眠边界被保护。";
+      difficulty = 1;
+    } else if (slot.start === "03:00") {
+      title = "起床启动 / 今日冲突输入";
+      method = "喝水、洗漱、记录睡眠/体重/疼痛/今日冲突。";
+      expectedOutput = "今日硬约束与身体读数。";
+      difficulty = 1;
+    }
 
     return {
       start: slot.start,
       end: slot.end,
       domain,
-      title: index >= blockMap.length ? "缓冲与睡前降载" : title,
-      method: index >= blockMap.length ? "只做低刺激整理，不新增任务" : method,
-      expected_output: index >= blockMap.length ? "睡前稳定状态" : expectedOutput,
-      skill_node_ids: skillIds.length > 0 ? [...skillIds] : [pickFirstId(context.skillNodes.map((node) => node.id), "root")],
-      resource_ids: [...resourceIds],
-      difficulty: rescue ? Math.min(3, index < 6 ? 2 : 1) : index >= 18 ? 2 : 3,
-      checkin_required: true
+      title,
+      method,
+      expected_output: expectedOutput,
+      skill_node_ids: fallbackSkillIds,
+      resource_ids: ids.resourceIds,
+      difficulty: index >= 32 ? 1 : difficulty,
+      checkin_required: true,
+      route_id: route?.id ?? null,
+      route_stage_id: route?.currentStage?.id ?? null,
+      route_week_id: route?.currentWeek?.id ?? null,
+      fixed_slot_template_id: fixedSlot?.source === "template" ? fixedSlot.id : null,
+      course_slot_id: fixedSlot?.source === "course" ? fixedSlot.id : null,
+      open_agent_slot_id: fixedSlot?.source === "open_agent" ? fixedSlot.id : null,
+      protected: fixedSlot?.protected ?? false,
+      flexible: fixedSlot?.flexible ?? true,
+      route_topic: route?.currentWeek?.title ?? fixedSlot?.title ?? null,
+      slot_source: fixedSlot?.source ?? "fallback"
     };
   });
 

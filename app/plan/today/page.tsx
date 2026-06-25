@@ -27,6 +27,9 @@ export default async function TodayPlanPage({
         blocks: {
           orderBy: { sortOrder: "asc" },
           include: {
+            route: { select: { id: true, name: true, domain: true } },
+            routeStage: { select: { id: true, name: true } },
+            routeWeek: { select: { id: true, title: true } },
             resources: { include: { resource: true } },
             skills: { include: { skillNode: true } }
           }
@@ -51,6 +54,13 @@ export default async function TodayPlanPage({
       expectedOutput: block.expectedOutput,
       difficulty: block.difficulty,
       status: block.status,
+      protected: block.protected,
+      flexible: block.flexible,
+      routeTopic: block.routeTopic,
+      slotSource: block.slotSource,
+      route: block.route,
+      routeStage: block.routeStage,
+      routeWeek: block.routeWeek,
       resources: block.resources.map((link) => ({ id: link.resource.id, name: link.resource.name })),
       skills: block.skills.map((link) => ({ id: link.skillNode.id, name: link.skillNode.name }))
     })) ?? [];

@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    const context = await compilePlannerContext(user.id);
+    const context = await compilePlannerContext(user.id, date);
     const prompt = buildPlannerPrompt(dailyInput, context);
     const validationOptions = {
       requiredAnchorCodes: context.anchors.map((anchor) => anchor.id),
@@ -191,7 +191,8 @@ export async function POST(request: NextRequest) {
       dailyInputId: dailyInput.id,
       date,
       plan,
-      createdBy
+      createdBy,
+      routeSnapshotJson: context.routeContext
     });
     await prisma.agentRun.update({
       where: { id: agentRun.id },

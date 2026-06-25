@@ -1,5 +1,6 @@
 import type { ExecutionLog, Resource, SkillNode } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { compileRouteContext, type CompiledRouteContext } from "@/lib/routes/compile-route-context";
 import coreFrameworkSeed from "@/seed/core-framework.seed.json";
 import dailyTemplateSeed from "@/seed/daily-template.seed.json";
 import resourcesSeed from "@/seed/resources.seed.json";
@@ -50,6 +51,7 @@ export type PlannerContext = {
   skillNodes: PlannerSkillNode[];
   executionLogs: Array<ExecutionLog & { planBlock?: { domain: string; title: string } | null }>;
   outputSchemas: AiOutputSchemasSeed;
+  routeContext: CompiledRouteContext;
 };
 
 function mapSeedResource(resource: (typeof resourcesSeed)[number]): PlannerResource {
@@ -98,7 +100,7 @@ function mapSeedSkillNodes(): PlannerSkillNode[] {
   ];
 }
 
-export async function compilePlannerContext(userId: string): Promise<PlannerContext> {
+export async function compilePlannerContext(userId: string, date = new Date()): Promise<PlannerContext> {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -108,7 +110,8 @@ export async function compilePlannerContext(userId: string): Promise<PlannerCont
     skillNodes,
     dailyTemplateSetting,
     outputSchemasSetting,
-    executionLogs
+    executionLogs,
+    routeContext
   ] = await Promise.all([
     prisma.coreFramework.findFirst({
       where: { isActive: true },
@@ -138,7 +141,8 @@ export async function compilePlannerContext(userId: string): Promise<PlannerCont
       },
       orderBy: { createdAt: "desc" },
       take: 120
-    })
+    }),
+    compileRouteContext(userId, date)
   ]);
 
   const coreContent = (coreFramework?.content as CoreFrameworkSeed | undefined) ?? coreFrameworkSeed;
@@ -160,7 +164,8 @@ export async function compilePlannerContext(userId: string): Promise<PlannerCont
     skillNodes: skillNodes.length > 0 ? skillNodes : mapSeedSkillNodes(),
     executionLogs,
     outputSchemas:
-      (outputSchemasSetting?.value as AiOutputSchemasSeed | undefined) ?? aiOutputSchemasSeed
+      (outputSchemasSetting?.value as AiOutputSchemasSeed | undefined) ?? aiOutputSchemasSeed,
+    routeContext
   };
 }
 
@@ -195,6 +200,7 @@ export function summarizePlannerContext(context: PlannerContext) {
       note: log.note,
       artifact_url: log.artifactUrl,
       block: log.planBlock
-    }))
+    })),
+    route_context: context.routeContext
   };
 }

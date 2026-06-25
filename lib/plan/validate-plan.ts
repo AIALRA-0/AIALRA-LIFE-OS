@@ -21,7 +21,17 @@ export const GeneratedPlanBlockSchema = z.object({
   skill_node_ids: z.array(z.string()),
   resource_ids: z.array(z.string()),
   difficulty: z.number().int().min(1).max(5),
-  checkin_required: z.boolean()
+  checkin_required: z.boolean(),
+  route_id: z.string().optional().nullable(),
+  route_stage_id: z.string().optional().nullable(),
+  route_week_id: z.string().optional().nullable(),
+  fixed_slot_template_id: z.string().optional().nullable(),
+  course_slot_id: z.string().optional().nullable(),
+  open_agent_slot_id: z.string().optional().nullable(),
+  protected: z.boolean().optional(),
+  flexible: z.boolean().optional(),
+  route_topic: z.string().optional().nullable(),
+  slot_source: z.string().optional().nullable()
 });
 
 export const GeneratedDailyPlanSchema = z.object({

@@ -11,6 +11,9 @@ export function buildPlannerPrompt(input: DailyInput, context: PlannerContext) {
     "- Every plan block must be exactly 30 minutes or a multiple of 30 minutes aligned to HH:00/HH:30.",
     "- Daily domains must appear: health, diet, vocal, dance, music, chip_eda, ai_agent, business, external_feedback, review.",
     "- Chip/EDA is the highest priority mainline. AI agent work is an accelerator and must not swallow the mainline.",
+    "- Use route_context.fixedSlots as the day skeleton. Protected slots must not be moved or replaced.",
+    "- Use route_context.routes currentWeek/currentStage to choose today's topics. Do not invent a new life route.",
+    "- 03:30-04:00 must use Body Activation Route. 07:00-08:00 must use Movement Training Route or its rescue version.",
     "- If energy/focus is low, pain is high, or anxiety/urge risk is high, produce a low-intensity rescue plan.",
     "- Every block must include a verifiable expected_output.",
     "- User-facing text must be written in Simplified Chinese: day_theme, block title, method, expected_output, rescue_plan, success_criteria.",
@@ -63,7 +66,8 @@ export function buildPlannerPrompt(input: DailyInput, context: PlannerContext) {
         note: log.note,
         artifact_url: log.artifactUrl,
         block: log.planBlock
-      }))
+      })),
+      route_context: context.routeContext
     })
   ].join("\n");
 }

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     });
 
     const [context, lifeContext] = await Promise.all([
-      compilePlannerContext(user.id),
+      compilePlannerContext(user.id, date),
       getLifeContext()
     ]);
     const promptPackage = buildManualPlannerPromptPackage({

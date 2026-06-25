@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "JSON 不符合 daily_plan_schema。", validation: { ok: false, errors } }, { status: 422 });
     }
 
-    const context = await compilePlannerContext(user.id);
+    const context = await compilePlannerContext(user.id, date);
     const validation = validatePlan(parsed.data, {
       requiredAnchorCodes: context.anchors.map((anchor) => anchor.id),
       requiredDomains: context.requiredDomains,
@@ -92,7 +92,8 @@ export async function POST(request: Request) {
       date,
       plan: parsed.data,
       createdBy: "chatgpt-pro-manual",
-      aiSummary: "由 ChatGPT Pro 手动提示包生成并通过 Life OS 校验。"
+      aiSummary: "由 ChatGPT Pro 手动提示包生成并通过 Life OS 校验。",
+      routeSnapshotJson: context.routeContext
     });
 
     await prisma.agentRun.updateMany({

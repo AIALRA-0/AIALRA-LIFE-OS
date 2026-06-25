@@ -1,0 +1,533 @@
+{
+  "version": "1.0.0",
+  "start_date": "2026-06-25",
+  "routes": [
+    {
+      "name": "Chip/EDA Main Cognitive Route",
+      "description": "芯片/EDA 主认知路线：从 RV32I、流水线、验证、CAD/EDA、ASIC/SoC 到 AI for EDA。",
+      "domain": "Chip/EDA",
+      "status": "ACTIVE",
+      "stages": [
+        {
+          "order": 1,
+          "name": "CPU 架构认知升级",
+          "weeks": 4,
+          "objective": "把已有 RV32I CPU 项目升级成体系化 CPU 架构心智模型。",
+          "completion_standard": "完成 4 份架构地图，并能说明当前 CPU 项目的覆盖与缺口。",
+          "serial_or_parallel": "SERIAL"
+        },
+        {
+          "order": 2,
+          "name": "Verification and Reliable Digital Systems",
+          "weeks": 4,
+          "objective": "建立现代数字系统验证、可靠性和 DFT 的基础模型。",
+          "completion_standard": "能画出 testbench / monitor / scoreboard / coverage / DFT 的关系图。",
+          "serial_or_parallel": "SERIAL"
+        },
+        {
+          "order": 3,
+          "name": "EDA/CAD and RTL-to-GDS",
+          "weeks": 6,
+          "objective": "掌握从 RTL 到 GDS 的综合、布局布线、PPA、CAD 算法和商业 EDA 生态。",
+          "completion_standard": "完成 RTL-to-GDS 流程图、PPA tradeoff map、AI EDA landscape。",
+          "serial_or_parallel": "SERIAL"
+        },
+        {
+          "order": 4,
+          "name": "ASIC / Accelerator / SoC",
+          "weeks": 4,
+          "objective": "建立复杂 ASIC、AI accelerator、SoC generator、NoC 的系统级心智模型。",
+          "completion_standard": "完成 accelerator/SoC/NoC 证据图，并能转化为可执行项目任务。",
+          "serial_or_parallel": "SERIAL"
+        }
+      ],
+      "weeks": [
+        {
+          "week_index": 1,
+          "stage_order": 1,
+          "title": "RV32I baseline 与 ISA 语义",
+          "theme": "RV32I 指令格式、整数指令、load/store、branch/jump、现有 CPU 覆盖与缺口",
+          "concrete_topics": ["RV32I 指令格式", "整数指令", "load/store", "branch/jump", "当前用户已有 RV32I CPU 覆盖与缺口"],
+          "primary_resources": ["https://riscv.org/technical/specifications/"],
+          "expected_evidence": ["rv32i_architecture_map.md", "rv32i_gap_map.md"]
+        },
+        {
+          "week_index": 2,
+          "stage_order": 1,
+          "title": "Pipeline / Hazard",
+          "theme": "5-stage pipeline、data/control hazard、forwarding、stall、flush",
+          "concrete_topics": ["5-stage pipeline", "data hazard", "control hazard", "forwarding", "stall", "flush"],
+          "primary_resources": ["https://inst.eecs.berkeley.edu/~cs152/"],
+          "expected_evidence": ["pipeline_hazard_map.md"]
+        },
+        {
+          "week_index": 3,
+          "stage_order": 1,
+          "title": "Branch / Cache / Memory hierarchy",
+          "theme": "branch predictor、BTB、BHT、I/D cache、miss penalty、memory wall",
+          "concrete_topics": ["branch predictor", "BTB", "BHT", "I-cache", "D-cache", "miss penalty", "memory wall"],
+          "primary_resources": ["https://inst.eecs.berkeley.edu/~cs152/"],
+          "expected_evidence": ["branch_cache_memory_map.md"]
+        },
+        {
+          "week_index": 4,
+          "stage_order": 1,
+          "title": "OoO / Modern core mental model",
+          "theme": "renaming、ROB、issue queue、commit、LSQ、speculation、OoO verification",
+          "concrete_topics": ["register renaming", "reorder buffer", "issue queue", "commit", "load/store queue", "speculation", "why OoO verification is hard"],
+          "primary_resources": ["https://docs.boom-core.org/"],
+          "expected_evidence": ["ooo_mental_model.md"]
+        },
+        {
+          "week_index": 5,
+          "stage_order": 2,
+          "title": "Verification mindset",
+          "theme": "DUT、testbench、monitor、scoreboard、coverage、directed/random tests",
+          "concrete_topics": ["DUT", "testbench", "monitor", "scoreboard", "coverage", "directed tests", "random tests"],
+          "primary_resources": ["https://verificationacademy.com/"],
+          "expected_evidence": ["verification_concept_map.md"]
+        },
+        {
+          "week_index": 6,
+          "stage_order": 2,
+          "title": "cocotb / Verilator",
+          "theme": "lint、simulation、Python testbench、regression、CI",
+          "concrete_topics": ["lint", "simulation", "Python testbench", "regression", "CI"],
+          "primary_resources": ["https://verilator.org/guide/latest/", "https://docs.cocotb.org/en/stable/"],
+          "expected_evidence": ["verilator_cocotb_workflow_map.md"]
+        },
+        {
+          "week_index": 7,
+          "stage_order": 2,
+          "title": "UVM conceptual model",
+          "theme": "sequence、driver、monitor、scoreboard、env、agent、factory、reuse",
+          "concrete_topics": ["sequence", "driver", "monitor", "scoreboard", "env", "agent", "factory", "reuse"],
+          "primary_resources": ["https://accellera.org/downloads/standards/uvm", "https://www.chipverify.com/"],
+          "expected_evidence": ["uvm_concept_map.md"]
+        },
+        {
+          "week_index": 8,
+          "stage_order": 2,
+          "title": "DFT / Reliability",
+          "theme": "fault model、ATPG、fault simulation、BIST、reliable digital systems",
+          "concrete_topics": ["fault model", "test generation", "fault simulation", "BIST", "reliable digital systems"],
+          "primary_resources": ["EE658 course material if available"],
+          "expected_evidence": ["dft_reliability_map.md"]
+        },
+        {
+          "week_index": 9,
+          "stage_order": 3,
+          "title": "Synthesis",
+          "theme": "RTL to netlist、logic optimization、technology mapping、constraints",
+          "concrete_topics": ["RTL to netlist", "logic optimization", "technology mapping", "constraints"],
+          "primary_resources": ["https://yosyshq.readthedocs.io/projects/yosys/en/latest/"],
+          "expected_evidence": ["synthesis_flow_map.md"]
+        },
+        {
+          "week_index": 10,
+          "stage_order": 3,
+          "title": "Physical design flow",
+          "theme": "floorplan、placement、CTS、routing、DRC、congestion",
+          "concrete_topics": ["floorplan", "placement", "CTS", "routing", "DRC", "congestion"],
+          "primary_resources": ["https://openroad.readthedocs.io/en/latest/"],
+          "expected_evidence": ["physical_design_flow_map.md"]
+        },
+        {
+          "week_index": 11,
+          "stage_order": 3,
+          "title": "Timing / Power / Area",
+          "theme": "slack、critical path、utilization、power、area、PPA tradeoff、closure",
+          "concrete_topics": ["slack", "critical path", "utilization", "power", "area", "PPA tradeoff", "design closure"],
+          "primary_resources": ["https://openroad.readthedocs.io/en/latest/"],
+          "expected_evidence": ["ppa_tradeoff_map.md"]
+        },
+        {
+          "week_index": 12,
+          "stage_order": 3,
+          "title": "CAD algorithms",
+          "theme": "partitioning、floorplanning、placement、routing、graph algorithms、optimization",
+          "concrete_topics": ["partitioning", "floorplanning", "placement", "routing", "graph algorithms", "optimization"],
+          "primary_resources": ["EE680 material if available"],
+          "expected_evidence": ["cad_algorithm_map.md"]
+        },
+        {
+          "week_index": 13,
+          "stage_order": 3,
+          "title": "AI for EDA",
+          "theme": "ML placement、routing prediction、DSE、PPA prediction、closure automation",
+          "concrete_topics": ["ML placement", "routing prediction", "design space exploration", "PPA prediction", "closure automation"],
+          "primary_resources": ["https://www.synopsys.com/ai.html"],
+          "expected_evidence": ["ai_eda_landscape_map.md"]
+        },
+        {
+          "week_index": 14,
+          "stage_order": 3,
+          "title": "Commercial EDA landscape",
+          "theme": "Cadence、Synopsys、Siemens、Keysight、open-source EDA gaps、commercial tool value",
+          "concrete_topics": ["Cadence", "Synopsys", "Siemens", "Keysight", "open-source EDA gaps", "commercial tool value"],
+          "primary_resources": ["https://www.cadence.com/en_US/home/training.html", "https://training.plm.automation.siemens.com/index.cfm"],
+          "expected_evidence": ["commercial_eda_landscape.md"]
+        },
+        {
+          "week_index": 15,
+          "stage_order": 4,
+          "title": "Complex ASIC flow",
+          "theme": "algorithm-to-chip、RTL、accelerator、synthesis、physical design、post-fabrication",
+          "concrete_topics": ["algorithm-to-chip", "RTL", "accelerator", "synthesis", "physical design", "post-fabrication"],
+          "primary_resources": ["EE524 material if available"],
+          "expected_evidence": ["complex_asic_flow_map.md"]
+        },
+        {
+          "week_index": 16,
+          "stage_order": 4,
+          "title": "AI accelerator architecture",
+          "theme": "systolic array、dataflow、memory hierarchy、compute/memory tradeoff",
+          "concrete_topics": ["systolic array", "dataflow", "memory hierarchy", "compute/memory tradeoff"],
+          "primary_resources": ["https://eyeriss.mit.edu/", "https://github.com/ucb-bar/gemmini"],
+          "expected_evidence": ["ai_accelerator_map.md"]
+        },
+        {
+          "week_index": 17,
+          "stage_order": 4,
+          "title": "SoC generator",
+          "theme": "Rocket、BOOM、TileLink、config、generator thinking",
+          "concrete_topics": ["Rocket", "BOOM", "TileLink", "config", "generator thinking"],
+          "primary_resources": ["https://chipyard.readthedocs.io/en/stable/"],
+          "expected_evidence": ["chipyard_soc_map.md"]
+        },
+        {
+          "week_index": 18,
+          "stage_order": 4,
+          "title": "NoC / Interconnect",
+          "theme": "topology、routing、deadlock、bandwidth、latency、data movement",
+          "concrete_topics": ["topology", "routing", "deadlock", "bandwidth", "latency", "data movement"],
+          "primary_resources": ["NoC surveys"],
+          "expected_evidence": ["noc_interconnect_map.md"]
+        }
+      ],
+      "evidence_nodes": [
+        {
+          "name": "RV32I Architecture Map",
+          "track": "Architecture",
+          "current_level": 0,
+          "next_gate": "完成 rv32i_architecture_map.md 并连接到现有 CPU 项目",
+          "required_artifact": "rv32i_architecture_map.md",
+          "linked_resource_urls": ["https://riscv.org/technical/specifications/"],
+          "confidence": 0
+        },
+        {
+          "name": "Verification Concept Map",
+          "track": "Verification",
+          "current_level": 0,
+          "next_gate": "完成 verification_concept_map.md",
+          "required_artifact": "verification_concept_map.md",
+          "linked_resource_urls": ["https://verificationacademy.com/"],
+          "confidence": 0
+        },
+        {
+          "name": "RTL-to-GDS Flow Map",
+          "track": "EDA/CAD",
+          "current_level": 0,
+          "next_gate": "完成 synthesis/placement/timing 三张流程图",
+          "required_artifact": "rtl_to_gds_flow_map.md",
+          "linked_resource_urls": ["https://openroad.readthedocs.io/en/latest/"],
+          "confidence": 0
+        }
+      ]
+    },
+    {
+      "name": "AI Systems Parallel Route",
+      "description": "AI agent 支线加速器：Context、tool result、trace/replay/eval、Codex sidecar、resource route engine、repair agent。",
+      "domain": "AI Systems",
+      "status": "ACTIVE",
+      "stages": [
+        {
+          "order": 1,
+          "name": "Context Engineering",
+          "weeks": 4,
+          "objective": "建立长上下文、状态、prompt version、retrieval、working memory 心智模型。",
+          "completion_standard": "完成 context_contract.md 和 prompt_version_log.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 2,
+          "name": "Tool Call / Tool Result",
+          "weeks": 4,
+          "objective": "掌握 tool_call_id、tool_result、idempotency、retry、state settlement。",
+          "completion_standard": "完成 tool_result_contract.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 3,
+          "name": "Trace / Replay / Eval",
+          "weeks": 4,
+          "objective": "为 AgentRun 建立可追踪、可复放、可评测链路。",
+          "completion_standard": "完成 trace_replay_eval_map.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 4,
+          "name": "Codex Sidecar Workflow",
+          "weeks": 4,
+          "objective": "让 Codex 成为执行器而不是路线制定者。",
+          "completion_standard": "完成 sidecar_task_spec.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 5,
+          "name": "Resource Route Engine",
+          "weeks": 4,
+          "objective": "资源到路线、路线到技能、技能到 block、block 到证据。",
+          "completion_standard": "完成 resource_route_graph.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 6,
+          "name": "Repair Agent",
+          "weeks": 4,
+          "objective": "处理冲突输入、受保护锚点、弹性 block、剩余日程修复。",
+          "completion_standard": "完成 repair_agent_rules.md。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "week_template": [
+        "Context Engineering",
+        "Tool Call / Tool Result",
+        "Trace / Replay / Eval",
+        "Codex Sidecar Workflow",
+        "Resource Route Engine",
+        "Repair Agent"
+      ],
+      "evidence_nodes": [
+        {
+          "name": "Agent Context Contract",
+          "track": "Context",
+          "current_level": 0,
+          "next_gate": "完成 context_contract.md",
+          "required_artifact": "context_contract.md",
+          "linked_resource_urls": ["https://developers.openai.com/api/docs/guides/text"],
+          "confidence": 0
+        }
+      ]
+    },
+    {
+      "name": "Business/Finance/Management/Expression Parallel Route",
+      "description": "商业、金融、管理和表达路线，服务长期资源整合与职业策略。",
+      "domain": "Business",
+      "status": "ACTIVE",
+      "stages": [
+        {
+          "order": 1,
+          "name": "Personal cash flow and finance basics",
+          "weeks": 4,
+          "objective": "建立个人现金流、估值和财务基础。",
+          "completion_standard": "完成 personal_cashflow_map.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 2,
+          "name": "Semiconductor value chain and company map",
+          "weeks": 4,
+          "objective": "建立半导体产业链公司地图。",
+          "completion_standard": "完成 semiconductor_company_map.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 3,
+          "name": "Startup and product thinking",
+          "weeks": 4,
+          "objective": "建立产品、创业、用户价值和 GTM 基础。",
+          "completion_standard": "完成 startup_product_map.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 4,
+          "name": "Management and organization",
+          "weeks": 4,
+          "objective": "建立组织协作和管理基础。",
+          "completion_standard": "完成 management_map.md。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 5,
+          "name": "Expression and public speaking",
+          "weeks": 4,
+          "objective": "训练表达、演讲、叙事和外部沟通。",
+          "completion_standard": "完成 3 次结构化表达记录。",
+          "serial_or_parallel": "PARALLEL"
+        },
+        {
+          "order": 6,
+          "name": "Career network and family resource strategy",
+          "weeks": 4,
+          "objective": "建立职业网络和家庭资源策略。",
+          "completion_standard": "完成 network_strategy.md。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "week_template": [
+        "Personal cash flow and finance basics",
+        "Semiconductor value chain and company map",
+        "Startup and product thinking",
+        "Management and organization",
+        "Expression and public speaking",
+        "Career network and family resource strategy"
+      ],
+      "evidence_nodes": [
+        {
+          "name": "Personal Cash Flow Map",
+          "track": "Finance",
+          "current_level": 0,
+          "next_gate": "完成 personal_cashflow_map.md",
+          "required_artifact": "personal_cashflow_map.md",
+          "linked_resource_urls": ["https://pages.stern.nyu.edu/~adamodar/"],
+          "confidence": 0
+        }
+      ]
+    },
+    {
+      "name": "Body Route",
+      "description": "身体/饮食/睡眠总路线：统筹 03:30 身体激活、07:00 运动训练、09:00/16:00 饮食、20:00 睡眠边界。",
+      "domain": "Body",
+      "status": "ACTIVE",
+      "stages": [
+        {
+          "order": 1,
+          "name": "Body and diet operating baseline",
+          "weeks": 24,
+          "objective": "把身体激活、运动训练、饮食补剂和睡眠边界变成每日不可破坏的操作系统。",
+          "completion_standard": "每周完成身体激活、训练、饮食、睡眠四类证据记录。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "week_template": [
+        "Body activation",
+        "Movement training",
+        "Diet and supplements",
+        "Sleep boundary"
+      ],
+      "evidence_nodes": [
+        {
+          "name": "Body Operating Baseline",
+          "track": "Body",
+          "current_level": 0,
+          "next_gate": "连续 7 天完成身体/饮食/睡眠闭环记录",
+          "required_artifact": "weekly body operating log",
+          "linked_resource_urls": [],
+          "confidence": 0
+        }
+      ]
+    },
+    {
+      "name": "Vocal Route",
+      "description": "声乐路线：Estill / CVT / 录音证据。",
+      "domain": "Vocal",
+      "status": "ACTIVE",
+      "stages": [
+        {
+          "order": 1,
+          "name": "Daily vocal evidence",
+          "weeks": 24,
+          "objective": "每天产出 60 秒录音、clean take 或 phrase analysis。",
+          "completion_standard": "每周至少 5 条声乐证据。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "week_template": ["60-second recording", "clean take", "phrase analysis"],
+      "evidence_nodes": [
+        {
+          "name": "60-second Recording",
+          "track": "Vocal Evidence",
+          "current_level": 0,
+          "next_gate": "上传或记录 60 秒录音",
+          "required_artifact": "60-second recording",
+          "linked_resource_urls": ["https://estillvoice.com/", "https://completevocal.institute/"],
+          "confidence": 0
+        }
+      ]
+    },
+    {
+      "name": "Dance Route",
+      "description": "舞蹈路线：STEEZY / CLI Studios / BDC，产出短视频证据。",
+      "domain": "Dance",
+      "status": "ACTIVE",
+      "stages": [
+        {
+          "order": 1,
+          "name": "Daily dance evidence",
+          "weeks": 24,
+          "objective": "每天完成 30 秒视频或 60 秒 routine。",
+          "completion_standard": "每周至少 5 条舞蹈证据。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "week_template": ["30-second video", "60-second routine"],
+      "evidence_nodes": [
+        {
+          "name": "Dance Routine Clip",
+          "track": "Dance Evidence",
+          "current_level": 0,
+          "next_gate": "上传或记录 30 秒舞蹈视频",
+          "required_artifact": "30-second video",
+          "linked_resource_urls": ["https://www.steezy.co/", "https://www.clistudios.com/"],
+          "confidence": 0
+        }
+      ]
+    },
+    {
+      "name": "Music Production Route",
+      "description": "音乐制作路线：FL Studio、SoundGym、Berklee，产出 loop / wav / ear training 记录。",
+      "domain": "Music",
+      "status": "ACTIVE",
+      "stages": [
+        {
+          "order": 1,
+          "name": "Daily production evidence",
+          "weeks": 24,
+          "objective": "每天产出 8-bar loop、exported wav 或 ear training record。",
+          "completion_standard": "每周至少 5 条音乐制作证据。",
+          "serial_or_parallel": "PARALLEL"
+        }
+      ],
+      "week_template": ["8-bar loop", "exported wav", "ear training record"],
+      "evidence_nodes": [
+        {
+          "name": "8-bar Loop",
+          "track": "Music Evidence",
+          "current_level": 0,
+          "next_gate": "导出或记录 8-bar loop",
+          "required_artifact": "8-bar loop",
+          "linked_resource_urls": ["https://www.image-line.com/fl-studio-learning/fl-studio-online-manual/", "https://www.soundgym.co/"],
+          "confidence": 0
+        }
+      ]
+    }
+  ],
+  "fixed_time_slots": [
+    { "start_time": "03:00", "end_time": "03:30", "slot_type": "ANCHOR", "title": "起床启动 / 今日冲突输入", "route_domain": null, "protected": true, "flexible": false, "default_rule": "必须保留：起床、补水、记录今日冲突。" },
+    { "start_time": "03:30", "end_time": "04:00", "slot_type": "BODY_ACTIVATION", "title": "身体激活", "route_domain": "Body", "protected": true, "flexible": false, "default_rule": "使用 Body Activation Route 当前阶段动作。" },
+    { "start_time": "04:00", "end_time": "06:00", "slot_type": "FIXED_ROUTE", "title": "当前 Stage 主认知主题 A", "route_domain": "Chip/EDA", "protected": true, "flexible": false, "default_rule": "绑定 Chip/EDA 当前周主题，必须有可验证产出。" },
+    { "start_time": "06:00", "end_time": "07:00", "slot_type": "FIXED_ROUTE", "title": "当前 Stage 主认知主题 B", "route_domain": "Chip/EDA", "protected": true, "flexible": false, "default_rule": "延续 Chip/EDA 当前周主题，做整理/练习/证据产出。" },
+    { "start_time": "07:00", "end_time": "08:00", "slot_type": "MOVEMENT_TRAINING", "title": "运动训练", "route_domain": "Body", "protected": true, "flexible": true, "default_rule": "使用 Movement Training Route 当日模板；高疼痛/低能量时降级。" },
+    { "start_time": "08:00", "end_time": "08:30", "slot_type": "ANCHOR", "title": "洗澡整理", "route_domain": null, "protected": false, "flexible": true, "default_rule": "清洁、换衣、整理环境。" },
+    { "start_time": "08:30", "end_time": "09:00", "slot_type": "FIXED_ROUTE", "title": "当前 Stage 主资料输入", "route_domain": "Chip/EDA", "protected": false, "flexible": true, "default_rule": "阅读主资源，提取概念和问题。" },
+    { "start_time": "09:00", "end_time": "09:30", "slot_type": "MEAL", "title": "第一餐", "route_domain": "Body/Diet", "protected": true, "flexible": false, "default_rule": "蛋白质、蔬菜、主碳水、补剂检查。" },
+    { "start_time": "09:30", "end_time": "11:30", "slot_type": "FIXED_ROUTE", "title": "当前 Stage 主认知主题 C", "route_domain": "Chip/EDA", "protected": false, "flexible": true, "default_rule": "完成当天核心证据。" },
+    { "start_time": "11:30", "end_time": "12:00", "slot_type": "PARALLEL_ROUTE", "title": "并行 Stage 6 商业/表达", "route_domain": "Business", "protected": false, "flexible": true, "default_rule": "商业/金融/管理/表达每日最小推进。" },
+    { "start_time": "12:00", "end_time": "14:00", "slot_type": "COURSE_SLOT", "title": "CourseSlot A；无课回落当前 Stage", "route_domain": null, "protected": false, "flexible": true, "default_rule": "优先插入课程；无课则回到 Chip/EDA 或整理课程证据。" },
+    { "start_time": "14:00", "end_time": "15:00", "slot_type": "PARALLEL_ROUTE", "title": "并行 Stage 5 AI Systems", "route_domain": "AI Systems", "protected": false, "flexible": true, "default_rule": "AI agent 支线必须服务主线，不吞掉 Chip/EDA。" },
+    { "start_time": "15:00", "end_time": "16:00", "slot_type": "OPEN_AGENT_SLOT", "title": "OpenSlot 外联/课程/生活事项", "route_domain": null, "protected": false, "flexible": true, "default_rule": "用于外部变动、生活行政、外联和 agent repair。" },
+    { "start_time": "16:00", "end_time": "16:30", "slot_type": "MEAL", "title": "第二餐", "route_domain": "Body/Diet", "protected": true, "flexible": true, "default_rule": "可因课程冲突移动，但必须保留饮食闭环。" },
+    { "start_time": "16:30", "end_time": "17:00", "slot_type": "ANCHOR", "title": "饭后走路", "route_domain": "Body", "protected": false, "flexible": true, "default_rule": "低强度步行或轻恢复。" },
+    { "start_time": "17:00", "end_time": "17:40", "slot_type": "ART_SLOT", "title": "声乐", "route_domain": "Vocal", "protected": false, "flexible": true, "default_rule": "声乐路线最小证据。" },
+    { "start_time": "17:40", "end_time": "18:20", "slot_type": "ART_SLOT", "title": "舞蹈", "route_domain": "Dance", "protected": false, "flexible": true, "default_rule": "舞蹈路线最小证据。" },
+    { "start_time": "18:20", "end_time": "18:50", "slot_type": "ART_SLOT", "title": "音乐制作/耳训", "route_domain": "Music", "protected": false, "flexible": true, "default_rule": "音乐路线最小证据。" },
+    { "start_time": "18:50", "end_time": "19:20", "slot_type": "ANCHOR", "title": "LifeOS 日结/技能证据", "route_domain": "Life Operations", "protected": true, "flexible": false, "default_rule": "写日结、补证据、审计完成率。" },
+    { "start_time": "19:20", "end_time": "20:00", "slot_type": "SHUTDOWN", "title": "下线/洗漱/睡眠准备", "route_domain": null, "protected": true, "flexible": false, "default_rule": "不可安排 20:00 后任务。" }
+  ],
+  "diet_default": {
+    "foods": ["romaine lettuce", "boiled eggs", "chicken thigh or beef patty", "bread as main carb", "Greek yogurt", "chia seeds", "frozen blueberries", "small amount of nuts", "boiled broccoli"],
+    "supplements": ["fish oil", "magnesium", "creatine", "One A Day", "vitamin C", "vitamin D"],
+    "checkin_fields": ["protein_ok", "vegetable_ok", "fruit_ok", "carb_ok", "supplements_taken", "overeating_or_not"]
+  }
+}

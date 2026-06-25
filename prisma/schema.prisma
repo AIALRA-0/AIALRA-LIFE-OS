@@ -47,37 +47,92 @@ enum PriorityLevel {
   CRITICAL
 }
 
-model UserProfile {
-  id             String   @id @default(uuid())
-  email          String   @unique
-  displayName    String?
-  timezone       String   @default("America/New_York")
-  sleepStart     String   @default("20:00")
-  wakeTime       String   @default("03:00")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  dailyInputs    DailyInput[]
-  dailyPlans     DailyPlan[]
-  executionLogs  ExecutionLog[]
-  skillEvidence  SkillEvidence[]
-  metricSnapshots MetricSnapshot[]
-  journalEntries JournalEntry[]
-  backlogItems   BacklogItem[]
-  decisionLogs   DecisionLog[]
-  auditEvents    AuditEvent[]
+enum RouteStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
 }
 
-model CoreFramework {
+enum RouteStageMode {
+  SERIAL
+  PARALLEL
+}
+
+enum FixedSlotType {
+  ANCHOR
+  FIXED_ROUTE
+  PARALLEL_ROUTE
+  COURSE_SLOT
+  OPEN_AGENT_SLOT
+  ART_SLOT
+  MEAL
+  SHUTDOWN
+  BODY_ACTIVATION
+  MOVEMENT_TRAINING
+}
+
+enum OpenAgentSlotSource {
+  USER_CONFLICT
+  AGENT_REPAIR
+  COURSE_OVERFLOW
+  LIFE_ADMIN
+  NETWORKING
+  CODEX_REVIEW
+}
+
+enum CodexSidecarStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+  REVIEWED
+}
+
+enum BodyCheckinType {
+  BODY_ACTIVATION
+  MOVEMENT_TRAINING
+  DIET
+  GENERAL
+}
+
+model UserProfile {
   id          String   @id @default(uuid())
-  version     String
-  title       String
-  content     Json
-  isActive    Boolean  @default(true)
+  email       String   @unique
+  displayName String?
+  timezone    String   @default("America/New_York")
+  sleepStart  String   @default("20:00")
+  wakeTime    String   @default("03:00")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  anchors     Anchor[]
+  dailyInputs            DailyInput[]
+  dailyPlans             DailyPlan[]
+  executionLogs          ExecutionLog[]
+  skillEvidence          SkillEvidence[]
+  metricSnapshots        MetricSnapshot[]
+  journalEntries         JournalEntry[]
+  backlogItems           BacklogItem[]
+  decisionLogs           DecisionLog[]
+  auditEvents            AuditEvent[]
+  cognitiveRoutes        CognitiveRoute[]
+  fixedTimeSlotTemplates FixedTimeSlotTemplate[]
+  courseSlots            CourseSlot[]
+  openAgentSlots         OpenAgentSlot[]
+  routeEvidenceNodes     RouteEvidenceNode[]
+  codexSidecarTasks      CodexSidecarTask[]
+  bodyCheckins           BodyCheckin[]
+}
+
+model CoreFramework {
+  id        String   @id @default(uuid())
+  version   String
+  title     String
+  content   Json
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  anchors Anchor[]
 }
 
 model Anchor {
@@ -92,141 +147,167 @@ model Anchor {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  framework      CoreFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
+  framework CoreFramework @relation(fields: [frameworkId], references: [id], onDelete: Cascade)
 }
 
 model Resource {
-  id                   String         @id
-  name                 String
-  url                  String
-  language             String
-  price                String
-  learningDepth        String
-  practicality         String
-  jobMatch             Float
-  completionThreshold  String
-  replacementRisk      String
-  tags                 String[]
-  phase                String[]
-  accessChannel        String
-  status               ResourceStatus @default(SEED)
-  notes                String?
-  lastVerifiedAt       DateTime?
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  id                  String         @id
+  name                String
+  url                 String
+  language            String
+  price               String
+  learningDepth       String
+  practicality        String
+  jobMatch            Float
+  completionThreshold String
+  replacementRisk     String
+  tags                String[]
+  phase               String[]
+  accessChannel       String
+  status              ResourceStatus @default(SEED)
+  notes               String?
+  lastVerifiedAt      DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 
-  planBlocks           PlanBlockResource[]
-  skillEvidence        SkillEvidence[]
+  planBlocks    PlanBlockResource[]
+  skillEvidence SkillEvidence[]
 }
 
 model SkillNode {
-  id                String   @id
-  parentId          String?
-  name              String
-  domain            String
-  currentLevel      Float    @default(0)
-  targetLevel       Float    @default(5)
-  evidenceRequired  String[]
-  description       String?
-  sortOrder         Int      @default(0)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String   @id
+  parentId         String?
+  name             String
+  domain           String
+  currentLevel     Float    @default(0)
+  targetLevel      Float    @default(5)
+  evidenceRequired String[]
+  description      String?
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  parent            SkillNode?  @relation("SkillTree", fields: [parentId], references: [id])
-  children          SkillNode[] @relation("SkillTree")
-  evidence          SkillEvidence[]
-  planBlocks        PlanBlockSkill[]
+  parent             SkillNode?          @relation("SkillTree", fields: [parentId], references: [id])
+  children           SkillNode[]         @relation("SkillTree")
+  evidence           SkillEvidence[]
+  planBlocks         PlanBlockSkill[]
+  routeEvidenceNodes RouteEvidenceNode[]
 }
 
 model SkillEvidence {
-  id             String   @id @default(uuid())
-  userId         String
-  skillNodeId    String
-  resourceId     String?
-  title          String
-  description    String
-  artifactUrl    String?
-  delta          Float    @default(0)
-  confidence     Float    @default(0.5)
-  evidenceDate   DateTime @default(now())
-  createdAt      DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String
+  skillNodeId  String
+  resourceId   String?
+  title        String
+  description  String
+  artifactUrl  String?
+  delta        Float    @default(0)
+  confidence   Float    @default(0.5)
+  evidenceDate DateTime @default(now())
+  createdAt    DateTime @default(now())
 
-  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  skillNode      SkillNode   @relation(fields: [skillNodeId], references: [id], onDelete: Cascade)
-  resource       Resource?   @relation(fields: [resourceId], references: [id])
+  user      UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillNode SkillNode   @relation(fields: [skillNodeId], references: [id], onDelete: Cascade)
+  resource  Resource?   @relation(fields: [resourceId], references: [id])
 }
 
 model DailyInput {
-  id                String   @id @default(uuid())
-  userId            String
-  date              DateTime
-  mustDo            String
-  temporaryItems    String?
-  specialNeeds      String?
-  bodyStatus        Json?
-  mentalStatus      Json?
-  availableWindows  Json?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String   @id @default(uuid())
+  userId           String
+  date             DateTime
+  mustDo           String
+  temporaryItems   String?
+  specialNeeds     String?
+  bodyStatus       Json?
+  mentalStatus     Json?
+  availableWindows Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  user              UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyPlan         DailyPlan?
+  user      UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyPlan DailyPlan?
 }
 
 model DailyPlan {
-  id               String      @id @default(uuid())
-  userId           String
-  dailyInputId     String?     @unique
-  date             DateTime
-  timezone         String      @default("America/New_York")
-  title            String
-  dayTheme         String
-  riskLevel        String
-  status           PlanStatus  @default(DRAFT)
-  aiSummary        String?
-  planJson         Json
-  rescuePlanJson   Json?
-  successCriteria  String[]
-  createdBy        String      @default("agent")
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  id                String     @id @default(uuid())
+  userId            String
+  dailyInputId      String?    @unique
+  date              DateTime
+  timezone          String     @default("America/New_York")
+  title             String
+  dayTheme          String
+  riskLevel         String
+  status            PlanStatus @default(DRAFT)
+  aiSummary         String?
+  planJson          Json
+  routeSnapshotJson Json?
+  rescuePlanJson    Json?
+  successCriteria   String[]
+  createdBy         String     @default("agent")
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
-  user             UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  dailyInput       DailyInput? @relation(fields: [dailyInputId], references: [id])
-  blocks           PlanBlock[]
-  agentRuns        AgentRun[]
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dailyInput DailyInput? @relation(fields: [dailyInputId], references: [id])
+  blocks     PlanBlock[]
+  agentRuns  AgentRun[]
 }
 
 model PlanBlock {
-  id              String      @id @default(uuid())
-  dailyPlanId     String
-  startTime       String
-  endTime         String
-  domain          String
-  title           String
-  method          String
-  expectedOutput  String
-  difficulty      Int         @default(3)
-  checkinRequired Boolean     @default(true)
-  status          BlockStatus @default(PLANNED)
-  actualStart     DateTime?
-  actualEnd       DateTime?
-  sortOrder       Int
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                  String      @id @default(uuid())
+  dailyPlanId         String
+  startTime           String
+  endTime             String
+  domain              String
+  title               String
+  method              String
+  expectedOutput      String
+  difficulty          Int         @default(3)
+  checkinRequired     Boolean     @default(true)
+  status              BlockStatus @default(PLANNED)
+  actualStart         DateTime?
+  actualEnd           DateTime?
+  routeId             String?
+  routeStageId        String?
+  routeWeekId         String?
+  fixedSlotTemplateId String?
+  courseSlotId        String?
+  openAgentSlotId     String?
+  protected           Boolean     @default(false)
+  flexible            Boolean     @default(true)
+  routeTopic          String?
+  slotSource          String?
+  repairReason        String?
+  sortOrder           Int
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
-  dailyPlan       DailyPlan   @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
-  executionLogs   ExecutionLog[]
-  resources       PlanBlockResource[]
-  skills          PlanBlockSkill[]
+  dailyPlan         DailyPlan              @relation(fields: [dailyPlanId], references: [id], onDelete: Cascade)
+  route             CognitiveRoute?        @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  routeStage        RouteStage?            @relation(fields: [routeStageId], references: [id], onDelete: SetNull)
+  routeWeek         RouteWeek?             @relation(fields: [routeWeekId], references: [id], onDelete: SetNull)
+  fixedSlotTemplate FixedTimeSlotTemplate? @relation(fields: [fixedSlotTemplateId], references: [id], onDelete: SetNull)
+  courseSlot        CourseSlot?            @relation(fields: [courseSlotId], references: [id], onDelete: SetNull)
+  openAgentSlot     OpenAgentSlot?         @relation(fields: [openAgentSlotId], references: [id], onDelete: SetNull)
+  executionLogs     ExecutionLog[]
+  resources         PlanBlockResource[]
+  skills            PlanBlockSkill[]
+  sidecarTasks      CodexSidecarTask[]
+  bodyCheckins      BodyCheckin[]
+
+  @@index([routeId])
+  @@index([routeWeekId])
+  @@index([courseSlotId])
+  @@index([openAgentSlotId])
 }
 
 model PlanBlockResource {
   planBlockId String
   resourceId  String
 
-  planBlock   PlanBlock @relation(fields: [planBlockId], references: [id], onDelete: Cascade)
-  resource    Resource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  planBlock PlanBlock @relation(fields: [planBlockId], references: [id], onDelete: Cascade)
+  resource  Resource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@id([planBlockId, resourceId])
 }
@@ -235,29 +316,33 @@ model PlanBlockSkill {
   planBlockId String
   skillNodeId String
 
-  planBlock   PlanBlock @relation(fields: [planBlockId], references: [id], onDelete: Cascade)
-  skillNode   SkillNode @relation(fields: [skillNodeId], references: [id], onDelete: Cascade)
+  planBlock PlanBlock @relation(fields: [planBlockId], references: [id], onDelete: Cascade)
+  skillNode SkillNode @relation(fields: [skillNodeId], references: [id], onDelete: Cascade)
 
   @@id([planBlockId, skillNodeId])
 }
 
 model ExecutionLog {
-  id            String   @id @default(uuid())
-  userId        String
-  planBlockId   String?
-  status        BlockStatus
-  actualStart   DateTime?
-  actualEnd     DateTime?
-  energy        Int      @default(3)
-  focus         Int      @default(3)
-  urgeTrigger   String?
-  note          String
-  artifactUrl   String?
-  rawJson       Json?
-  createdAt     DateTime @default(now())
+  id               String      @id @default(uuid())
+  userId           String
+  planBlockId      String?
+  status           BlockStatus
+  actualStart      DateTime?
+  actualEnd        DateTime?
+  actualMinutes    Int?
+  energy           Int         @default(3)
+  focus            Int         @default(3)
+  painOrFatigue    Int?
+  distractionLevel Int?
+  urgeTrigger      String?
+  note             String
+  artifactUrl      String?
+  rawJson          Json?
+  createdAt        DateTime    @default(now())
 
-  user          UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  planBlock     PlanBlock?  @relation(fields: [planBlockId], references: [id], onDelete: SetNull)
+  user        UserProfile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planBlock   PlanBlock?   @relation(fields: [planBlockId], references: [id], onDelete: SetNull)
+  bodyCheckin BodyCheckin?
 }
 
 model MetricSnapshot {
@@ -277,40 +362,44 @@ model MetricSnapshot {
   supplements    Json?
   createdAt      DateTime @default(now())
 
-  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AgentRun {
-  id              String         @id @default(uuid())
-  dailyPlanId      String?
-  runType          String
-  model            String
-  status           AgentRunStatus @default(QUEUED)
-  inputJson        Json
-  outputJson       Json?
-  outputText       String?
-  error            String?
-  openaiResponseId String?
-  startedAt        DateTime?
-  completedAt      DateTime?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  id                     String         @id @default(uuid())
+  dailyPlanId            String?
+  runType                String
+  model                  String
+  promptVersion          String?
+  status                 AgentRunStatus @default(QUEUED)
+  inputJson              Json
+  outputJson             Json?
+  providerToolResultJson Json?
+  traceJson              Json?
+  replayInputJson        Json?
+  outputText             String?
+  error                  String?
+  openaiResponseId       String?
+  startedAt              DateTime?
+  completedAt            DateTime?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
 
-  dailyPlan        DailyPlan?      @relation(fields: [dailyPlanId], references: [id], onDelete: SetNull)
-  researchReports  ResearchReport[]
+  dailyPlan       DailyPlan?       @relation(fields: [dailyPlanId], references: [id], onDelete: SetNull)
+  researchReports ResearchReport[]
 }
 
 model ResearchReport {
-  id          String   @id @default(uuid())
-  agentRunId  String
-  title       String
-  summary     String
-  reportMd    String
-  citations   Json?
-  sources     Json?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  agentRunId String
+  title      String
+  summary    String
+  reportMd   String
+  citations  Json?
+  sources    Json?
+  createdAt  DateTime @default(now())
 
-  agentRun    AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+  agentRun AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
 }
 
 model FileAsset {
@@ -326,17 +415,17 @@ model FileAsset {
 }
 
 model JournalEntry {
-  id          String   @id @default(uuid())
-  userId      String
-  date        DateTime
-  entryType   String
-  title       String
-  content     String
-  tags        String[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(uuid())
+  userId    String
+  date      DateTime
+  entryType String
+  title     String
+  content   String
+  tags      String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  user        UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BacklogItem {
@@ -352,47 +441,47 @@ model BacklogItem {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  user        UserProfile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model DecisionLog {
-  id             String   @id @default(uuid())
-  userId         String
-  title          String
-  decision       String
-  context        String
-  optionsJson    Json
-  criteriaJson   Json
-  resultJson     Json?
-  reviewDate     DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id           String    @id @default(uuid())
+  userId       String
+  title        String
+  decision     String
+  context      String
+  optionsJson  Json
+  criteriaJson Json
+  resultJson   Json?
+  reviewDate   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model PromptTemplate {
-  id          String   @id
-  name        String
-  version     String
-  description String?
-  template    String
+  id           String   @id
+  name         String
+  version      String
+  description  String?
+  template     String
   outputSchema Json?
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model AuditEvent {
-  id          String   @id @default(uuid())
-  userId      String?
-  eventType   String
-  entityType  String?
-  entityId    String?
-  payload     Json
-  createdAt   DateTime @default(now())
+  id         String   @id @default(uuid())
+  userId     String?
+  eventType  String
+  entityType String?
+  entityId   String?
+  payload    Json
+  createdAt  DateTime @default(now())
 
-  user        UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
 }
 
 model SystemSetting {
@@ -400,4 +489,218 @@ model SystemSetting {
   value     Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model CognitiveRoute {
+  id          String      @id @default(uuid())
+  userId      String
+  name        String
+  description String
+  domain      String
+  status      RouteStatus @default(ACTIVE)
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user          UserProfile         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stages        RouteStage[]
+  weeks         RouteWeek[]
+  evidenceNodes RouteEvidenceNode[]
+  planBlocks    PlanBlock[]
+
+  @@unique([userId, name])
+  @@index([userId, status, domain])
+}
+
+model RouteStage {
+  id                 String         @id @default(uuid())
+  routeId            String
+  order              Int
+  name               String
+  weeks              Int
+  objective          String
+  completionStandard String
+  serialOrParallel   RouteStageMode
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  route         CognitiveRoute      @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  routeWeeks    RouteWeek[]
+  evidenceNodes RouteEvidenceNode[]
+  planBlocks    PlanBlock[]
+
+  @@unique([routeId, order])
+}
+
+model RouteWeek {
+  id               String   @id @default(uuid())
+  routeId          String
+  stageId          String
+  weekIndex        Int
+  title            String
+  theme            String
+  concreteTopics   Json
+  primaryResources Json
+  expectedEvidence Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  route         CognitiveRoute      @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stage         RouteStage          @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  evidenceNodes RouteEvidenceNode[]
+  planBlocks    PlanBlock[]
+  sidecarTasks  CodexSidecarTask[]
+
+  @@unique([routeId, weekIndex])
+  @@index([stageId])
+}
+
+model FixedTimeSlotTemplate {
+  id          String        @id @default(uuid())
+  userId      String
+  dayOfWeek   Int?
+  startTime   String
+  endTime     String
+  slotType    FixedSlotType
+  title       String
+  routeDomain String?
+  protected   Boolean       @default(false)
+  flexible    Boolean       @default(true)
+  defaultRule String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planBlocks PlanBlock[]
+
+  @@unique([userId, dayOfWeek, startTime, endTime])
+  @@index([userId, slotType])
+}
+
+model CourseSlot {
+  id         String   @id @default(uuid())
+  userId     String
+  courseName String
+  courseCode String
+  instructor String?
+  dayOfWeek  Int
+  startTime  String
+  endTime    String
+  location   String?
+  term       String?
+  source     String?
+  locked     Boolean  @default(true)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planBlocks PlanBlock[]
+
+  @@index([userId, active, dayOfWeek])
+}
+
+model OpenAgentSlot {
+  id            String              @id @default(uuid())
+  userId        String
+  date          DateTime
+  startTime     String
+  endTime       String
+  insertedTitle String
+  reason        String
+  source        OpenAgentSlotSource
+  createdAt     DateTime            @default(now())
+
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planBlocks PlanBlock[]
+
+  @@index([userId, date])
+}
+
+model RouteEvidenceNode {
+  id                 String    @id @default(uuid())
+  userId             String
+  skillNodeId        String?
+  routeId            String
+  stageId            String?
+  routeWeekId        String?
+  name               String
+  domain             String
+  track              String
+  currentLevel       Int       @default(0)
+  nextGate           String
+  requiredArtifact   String
+  linkedResourceUrls Json
+  confidence         Int       @default(0)
+  lastEvidenceAt     DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  user      UserProfile    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skillNode SkillNode?     @relation(fields: [skillNodeId], references: [id], onDelete: SetNull)
+  route     CognitiveRoute @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stage     RouteStage?    @relation(fields: [stageId], references: [id], onDelete: SetNull)
+  routeWeek RouteWeek?     @relation(fields: [routeWeekId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, routeId, track, name])
+  @@index([userId, domain, track])
+}
+
+model CodexSidecarTask {
+  id            String             @id @default(uuid())
+  userId        String
+  planBlockId   String?
+  routeWeekId   String?
+  title         String
+  prompt        String
+  status        CodexSidecarStatus @default(QUEUED)
+  repoUrl       String?
+  outputSummary String?
+  artifactUrl   String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  user      UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planBlock PlanBlock?  @relation(fields: [planBlockId], references: [id], onDelete: SetNull)
+  routeWeek RouteWeek?  @relation(fields: [routeWeekId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@index([planBlockId])
+}
+
+model BodyCheckin {
+  id                  String          @id @default(uuid())
+  executionLogId      String          @unique
+  userId              String
+  planBlockId         String?
+  checkinType         BodyCheckinType @default(GENERAL)
+  painBefore          Int?
+  painAfter           Int?
+  stiffnessBefore     Int?
+  stiffnessAfter      Int?
+  hipTightness        Int?
+  neckShoulderTension Int?
+  lumbarSignal        Int?
+  activationCompleted Boolean?
+  trainingType        String?
+  durationMinutes     Int?
+  distanceOrSteps     String?
+  setsCompleted       Json?
+  rpe                 Int?
+  fatigueAfter        Int?
+  zone2Completed      Boolean?
+  strengthCompleted   Boolean?
+  mobilityCompleted   Boolean?
+  evidenceText        String?
+  evidenceUrl         String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  executionLog ExecutionLog @relation(fields: [executionLogId], references: [id], onDelete: Cascade)
+  user         UserProfile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planBlock    PlanBlock?   @relation(fields: [planBlockId], references: [id], onDelete: SetNull)
+
+  @@index([userId, checkinType])
+  @@index([planBlockId])
 }

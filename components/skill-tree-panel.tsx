@@ -12,6 +12,9 @@ export type SkillTreeNode = {
   targetLevel: number;
   evidenceRequired: string[];
   evidenceCount: number;
+  routeEvidenceCount?: number;
+  nextGate?: string | null;
+  confidence?: number | null;
 };
 
 function NodeView({
@@ -40,6 +43,16 @@ function NodeView({
             <span className="font-mono text-[11px] text-muted-foreground">
               证据 {node.evidenceCount}
             </span>
+            {node.routeEvidenceCount ? (
+              <span className="font-mono text-[11px] text-primary">
+                路线证据 {node.routeEvidenceCount}
+              </span>
+            ) : null}
+            {typeof node.confidence === "number" ? (
+              <span className="font-mono text-[11px] text-muted-foreground">
+                信心 {node.confidence}%
+              </span>
+            ) : null}
           </div>
         </div>
       </summary>
@@ -48,6 +61,11 @@ function NodeView({
           <div className="h-full rounded bg-primary" style={{ width: `${progress}%` }} />
         </div>
         <ul className="mt-3 grid gap-1 text-xs text-muted-foreground">
+          {node.nextGate ? (
+            <li className="truncate text-primary">
+              下一关：{node.nextGate}
+            </li>
+          ) : null}
           {node.evidenceRequired.slice(0, 3).map((item) => (
             <li key={item} className="truncate">
               {item}
