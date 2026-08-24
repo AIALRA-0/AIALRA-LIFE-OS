@@ -68,7 +68,7 @@ export default async function SettingsPage() {
 
         <section className="rounded border border-white/10 bg-white/[0.035] p-4">
           <h2 className="text-sm font-semibold text-white">部署地址</h2>
-          <p className="mt-2 font-mono text-sm text-primary">lifeos.aialra.online</p>
+          <p className="mt-2 text-sm text-primary">已在私有运行环境中配置</p>
         </section>
 
         <LifeContextForm initialContext={lifeContext} />

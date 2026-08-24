@@ -39,8 +39,8 @@
    - `git status --short`
    - `git rev-parse --short HEAD`
 2. 记录当前线上状态：
-   - `systemctl is-active aialra-lifeos.service`
-   - `curl -I https://lifeos.aialra.online/`
+   - `systemctl is-active <private-service-name>.service`
+   - 使用私有生产域名检查根入口
 3. 运行当前质量基线：
    - `npm run lint`
    - `npm run typecheck`
@@ -54,7 +54,7 @@
 
 使用 Playwright 或等价浏览器测试：
 
-1. 登录 `https://lifeos.aialra.online/login`。
+1. 通过私有生产域名打开登录页。
 2. 访问并截图：
    - `/dashboard`
    - `/plan/new`
@@ -1006,9 +1006,9 @@ Daily plan JSON schema 建议增加：
 ### 线上部署
 
 1. `npm run build`
-2. `systemctl restart aialra-lifeos.service`
-3. `systemctl is-active aialra-lifeos.service`
-4. `curl -I https://lifeos.aialra.online/routes`
+2. `systemctl restart <private-service-name>.service`
+3. `systemctl is-active <private-service-name>.service`
+4. 使用私有生产域名检查 `/routes`
 5. 浏览器重复关键 E2E：
    - `/routes`
    - `/routes/current`
@@ -1062,7 +1062,7 @@ Daily plan JSON schema 建议增加：
 4. 如果线上失败：
    - `git checkout <previous-good-commit>`
    - `npm run build`
-   - `systemctl restart aialra-lifeos.service`
+   - `systemctl restart <private-service-name>.service`
 
 ## 最终验收标准
 

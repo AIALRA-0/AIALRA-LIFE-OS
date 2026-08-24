@@ -55,15 +55,9 @@ type DeepSeekResult = {
 
 const TEST_DATE = process.env.LIFEOS_E2E_DATE ?? "2099-01-01";
 const TEST_MARKER = "[DEEPSEEK_E2E]";
-const ENV_FILES = [
-  ".env.production",
-  ".env",
-  "/srv/aialra/config/secrets/codexapp.env",
-  "/srv/aialra/config/secrets/deeeeeepwiki.env",
-  "/srv/aialra/config/secrets/readlayer.env",
-  "/srv/aialra/config/secrets/opencode.env",
-  "/srv/aialra/config/secrets/opencode-debug1.env"
-];
+const ENV_FILES = [".env.production", ".env", process.env.LIFEOS_E2E_ENV_FILE].filter(
+  (path): path is string => Boolean(path)
+);
 
 function parseEnvFile(path: string): EnvMap {
   if (!existsSync(path)) return {};
@@ -378,7 +372,7 @@ async function main() {
     throw new Error("没有找到 Life OS 登录凭据。需要 LIFEOS_LOCAL_EMAIL/CODEXAPP_USERNAME 与对应密码。");
   }
 
-  const baseUrl = process.env.LIFEOS_TEST_APP_URL ?? "https://lifeos.aialra.online";
+  const baseUrl = process.env.LIFEOS_TEST_APP_URL ?? "http://127.0.0.1:3000";
   const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
   const deepSeekBaseUrl =
     process.env.DEEPSEEK_BASE_URL ?? env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com";

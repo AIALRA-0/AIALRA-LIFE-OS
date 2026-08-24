@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Aialra Life OS",
-  description: "用于每日计划、执行、复盘和技能树追踪的私人知识操作系统。"
+  description: "用于每日计划、执行、复盘和技能树追踪的私人知识操作系统。",
+  icons: { icon: "/lifeos-icon.svg" }
 };
 
 export default function RootLayout({

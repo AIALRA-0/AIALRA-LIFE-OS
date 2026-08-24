@@ -81,12 +81,12 @@ API E2E：
 部署方式：
 
 - `npm run build`
-- `systemctl restart aialra-lifeos.service`
-- nginx/Cloudflare 继续代理 `lifeos.aialra.online`
+- `systemctl restart <private-service-name>.service`
+- nginx/Cloudflare 继续代理私有生产域名
 
 线上 smoke：
 
-- `https://lifeos.aialra.online/`：307 到 `/dashboard`
+- 私有生产入口：307 到 `/dashboard`
 - 未登录 `/routes/current`：307 到 `/login`
 - 登录 API：200
 - `/api/routes/current`：9 routes，21 slots

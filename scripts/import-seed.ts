@@ -236,8 +236,11 @@ async function upsertSettingsAndPrompts() {
 
   await prisma.systemSetting.upsert({
     where: { key: "deployment_domain" },
-    update: { value: { domain: "lifeos.aialra.online" } },
-    create: { key: "deployment_domain", value: { domain: "lifeos.aialra.online" } }
+    update: { value: { domain: process.env.NEXT_PUBLIC_APP_URL ?? "https://lifeos.example.invalid" } },
+    create: {
+      key: "deployment_domain",
+      value: { domain: process.env.NEXT_PUBLIC_APP_URL ?? "https://lifeos.example.invalid" }
+    }
   });
 
   for (const [id, outputSchema] of Object.entries(aiOutputSchemasSeed)) {

@@ -53,8 +53,8 @@
    - `FixedTimeSlotTemplate`
    - `RouteEvidenceNode`
 7. 确认线上服务：
-   - `systemctl is-active aialra-lifeos.service`
-   - `curl -I https://lifeos.aialra.online/routes/current`
+   - `systemctl is-active <private-service-name>.service`
+   - 使用私有生产域名检查 `/routes/current`
 
 ### 网页测试
 
@@ -877,9 +877,9 @@ Body 部分必须显示：
 ### 部署
 
 1. `npm run build`
-2. `systemctl restart aialra-lifeos.service`
-3. `systemctl is-active aialra-lifeos.service`
-4. `curl -I https://lifeos.aialra.online/routes/current`
+2. `systemctl restart <private-service-name>.service`
+3. `systemctl is-active <private-service-name>.service`
+4. 使用私有生产域名检查 `/routes/current`
 5. 浏览器重复关键 E2E。
 
 ### 安全审计

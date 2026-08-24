@@ -17,11 +17,11 @@
 
 ## 2. 为什么现在用 nginx 反代
 
-现在 `lifeos.aialra.online` 已经跑在本机服务器上，所以 nginx 反代是最直接的方式。
+当前生产域名只保存在私有部署配置中，所以 nginx 反代是最直接的方式。
 
 当前链路是：
 
-用户访问 `https://lifeos.aialra.online`
+用户访问私有生产域名，公开示例统一使用 `https://lifeos.example.invalid`
 
 nginx 接收请求
 
